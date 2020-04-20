@@ -10,5 +10,7 @@ prance
 pycodestyle
 pycrypto
 pylint
+pytest
+pytest-cov
 requests
 warrant

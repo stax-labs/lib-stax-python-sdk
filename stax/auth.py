@@ -7,7 +7,7 @@ import boto3
 from aws_requests_auth.aws_auth import AWSRequestsAuth
 from botocore import UNSIGNED
 from botocore.client import Config as BotoConfig
-from warrant import Cognito
+from warrant import AWSSRP, Cognito
 
 from stax.config import Config as JumaConfig
 
@@ -32,14 +32,23 @@ class StaxAuth:
         return JumaConfig.auth
 
     def id_token_from_cognito(self, username, password):
-        u = Cognito(self.user_pool, self.client_id, username=username)
-        u.authenticate(password=password)
-        # logging.debug(f"TOK: {u.id_token}")
-        return u.id_token
+        client = boto3.client(
+            "cognito-idp", region_name=self.aws_region, config=BotoConfig(signature_version=UNSIGNED)
+        )
+        aws = AWSSRP(
+            username=username,
+            password=password,
+            pool_id=self.user_pool,
+            client_id=self.client_id,
+            client=client
+        )
+        tokens = aws.authenticate_user()
+        # logging.debug(f"TOKEN: {tokens}")
+        return tokens['AuthenticationResult']['IdToken']
 
     def sts_from_cognito_identity_pool(self, token):
         cognito = boto3.client(
-            "cognito-identity", config=BotoConfig(signature_version=UNSIGNED)
+            "cognito-identity", region_name=self.aws_region, config=BotoConfig(signature_version=UNSIGNED)
         )
         id = cognito.get_id(
             IdentityPoolId=self.identity_pool,
