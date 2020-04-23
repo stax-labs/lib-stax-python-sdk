@@ -1,0 +1,61 @@
+AWSTemplateFormatVersion: "2010-09-09"
+# Usage
+# Deploy this cloudformation into the security account
+# You will now be able to get the dencrypted creds from the chosen account
+# AccessAccountId is the account you want to be able to access the token
+# The keyId needs to be the key that locked the tokens (default has an alias stax-api-tokens)
+
+Description: ""
+Parameters:
+  ApiTokenName:  
+    Type: String   
+  Region: 
+    Type: String
+    Default: "ap-southeast-2"
+  AccessAccountId:
+      Type: Number
+  KeyId:
+      Type : 'AWS::SSM::Parameter::Value<String>'
+      Default: api-token-key
+
+Resources:
+    SsmAccessPolicy:
+        Type: "AWS::IAM::ManagedPolicy"
+        Properties:
+            ManagedPolicyName: !Sub "${ApiTokenName}ssm-access"
+            Description: "A policy designed to allow access api tokens of TheApiToken , created via the console"
+            PolicyDocument: 
+                Version: "2012-10-17"
+                Statement: 
+                  - 
+                    Effect: "Allow"
+                    Action: 
+                      - "ssm:GetParameter"
+                      - "ssm:GetParameters"
+                    Resource: !Sub "arn:aws:ssm:${Region}:${AWS::AccountId}:parameter/stax/api-tokens/${ApiTokenName}/*"
+                  - 
+                    Effect: "Allow"
+                    Action: 
+                      - "ssm:DescribeParameters"
+                    Resource: !Sub "arn:aws:ssm:${Region}:${AWS::AccountId}:*"
+                  - Effect: "Allow"
+                    Action: 
+                      - "kms:Decrypt"
+                    Resource: !Sub "arn:aws:kms:${Region}:${AWS::AccountId}:key/${KeyId}"
+            Roles:
+              - !Ref SsmAccessRole
+
+    SsmAccessRole:
+        Type: "AWS::IAM::Role"
+        Properties:
+            RoleName: !Sub "${ApiTokenName}-access-role"
+            AssumeRolePolicyDocument: 
+                Version: "2012-10-17"
+                Statement: 
+                  - 
+                    Effect: "Allow"
+                    Action: "sts:AssumeRole"
+                    Principal: 
+                        AWS: !Sub "arn:aws:iam::${AccessAccountId}:role/staxid-admin-role"
+                    Condition: !Ref "AWS::NoValue"
+                    

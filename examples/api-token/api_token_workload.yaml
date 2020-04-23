@@ -1,0 +1,4 @@
+Resources:
+  - WorkloadSSM:
+      Type: AWS::Cloudformation
+      TemplateURL: s3://<Insert Deployment Bucket Here>/api_token_cfn.yaml
