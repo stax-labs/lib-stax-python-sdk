@@ -16,6 +16,7 @@ class Config:
     """
 
     STAX_REGION = os.getenv("STAX_REGION", "au1.staxapp.cloud")
+    STAX_STAGE = os.getenv("STAX_STAGE", "stax-au1")
     API_VERSION = "20190206"
 
     api_config = dict()
@@ -32,11 +33,15 @@ class Config:
 
     @classmethod
     def set_config(cls):
-        cls.base_url = f"https://{cls.hostname}/{cls.API_VERSION}"
+        if cls.branch() == "master":
+            cls.base_url = f"https://api.{cls.STAX_REGION}/{cls.API_VERSION}"
+        else:
+            cls.base_url = f"https://api.{cls.STAX_STAGE}-{cls.branch()}.{cls.STAX_REGION}/{cls.API_VERSION}"
         config_url = cls.api_base_url() + "/public/config"
         config_response = requests.get(config_url)
         # logging.debug(f"IDAM: get config from {config_url}")
-
+        if(config_response.json().get('Error')):
+            raise Exception(f'Could not configure sdk. Error is {config_response.json()["Error"]}')
         cls.api_config = config_response.json()
 
     @classmethod
@@ -55,16 +60,11 @@ class Config:
 
     @classmethod
     def branch(cls):
-        return os.getenv("BRANCH", "master")
+        return os.getenv("STAX_BRANCH", "master")
 
     @classmethod
     def schema_url(cls):
-        if cls.branch() == "master":
-            return (
-                f"https://api.{cls.STAX_REGION}/{cls.API_VERSION}/public/api-document"
-            )
-        else:
-            return f"https://api-{cls.branch()}.{cls.STAX_REGION}/{cls.API_VERSION}/public/api-document"
+         f"https://{cls.base_url}/public/api-document"
 
     @classmethod
     def auth(cls):

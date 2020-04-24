@@ -58,7 +58,19 @@ class StaxClientTests(unittest.TestCase):
         response = self.client.ReadAccounts()
         self.assertEqual(response, response_dict)
 
-        # Test a valid GET with params
+        # Test a valid GET with path params
+        response_dict = {"Status": "OK"}
+        responses.add(
+            responses.GET,
+            f"{Config.api_base_url()}/accounts/fake-id",
+            json=response_dict,
+            status=200,
+        )
+        params = {"account_id": "fake-id", "Unit": "Test"}
+        response = self.client.ReadAccounts(**params)
+        self.assertEqual(response, response_dict)
+
+                # Test a valid GET with params
         response_dict = {"Status": "OK"}
         responses.add(
             responses.GET,
