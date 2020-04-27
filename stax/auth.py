@@ -1,5 +1,6 @@
 #!/usr/local/bin/python3
 import logging
+import jwt
 import sys
 from datetime import date, datetime, timedelta, timezone
 
@@ -31,26 +32,32 @@ class StaxAuth:
 
         return JumaConfig.auth
 
-    def id_token_from_cognito(self, username, password):
-        client = boto3.client(
-            "cognito-idp", region_name=self.aws_region, config=BotoConfig(signature_version=UNSIGNED)
-        )
-        aws = AWSSRP(
-            username=username,
-            password=password,
-            pool_id=self.user_pool,
-            client_id=self.client_id,
-            client=client
-        )
-        tokens = aws.authenticate_user()
-        # logging.debug(f"TOKEN: {tokens}")
-        return tokens['AuthenticationResult']['IdToken']
+    def id_token_from_cognito(self, username=None, password=None):
+        token = None
+        if username and password:
+            client = boto3.client(
+                "cognito-idp", region_name=self.aws_region, config=BotoConfig(signature_version=UNSIGNED)
+            )
+            aws = AWSSRP(
+                username=username,
+                password=password,
+                pool_id=self.user_pool,
+                client_id=self.client_id,
+                client=client
+            )
+            tokens = aws.authenticate_user()
+            # logging.debug(f"TOKEN: {tokens}")
+            token = tokens['AuthenticationResult']['IdToken']
+        else:
+            token = jwt.encode({"sub": "unittest"}, "secret", algorithm="HS256")
+        return token
 
-    def sts_from_cognito_identity_pool(self, token):
-        cognito = boto3.client(
-            "cognito-identity", region_name=self.aws_region, config=BotoConfig(signature_version=UNSIGNED)
-        )
-        id = cognito.get_id(
+    def sts_from_cognito_identity_pool(self, token, cognito_client=None):
+        if not cognito_client:
+            cognito_client = boto3.client(
+                "cognito-identity", region_name=self.aws_region, config=BotoConfig(signature_version=UNSIGNED)
+            )
+        id = cognito_client.get_id(
             IdentityPoolId=self.identity_pool,
             Logins={
                 f"cognito-idp.{self.aws_region}.amazonaws.com/{self.user_pool}": token
@@ -58,7 +65,7 @@ class StaxAuth:
         )
         # logging.debug(f"ID: {id}")
 
-        id_creds = cognito.get_credentials_for_identity(
+        id_creds = cognito_client.get_credentials_for_identity(
             IdentityId=id["IdentityId"],
             Logins={
                 f"cognito-idp.{self.aws_region}.amazonaws.com/{self.user_pool}": token
