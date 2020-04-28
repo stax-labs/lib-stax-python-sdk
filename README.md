@@ -1,4 +1,3 @@
-
 ## Install
 ```bash
 pip install stax

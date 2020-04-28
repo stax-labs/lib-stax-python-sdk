@@ -1,0 +1,5 @@
+[run]
+omit =
+    stax/data/*
+    tests/*
+    examples/*

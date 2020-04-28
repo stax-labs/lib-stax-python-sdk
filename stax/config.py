@@ -71,6 +71,7 @@ class Config:
         # logging.debug(f"AUTHCLASS: {cls.auth_class}")
         if cls.auth_class is None:
             from stax.auth import ApiTokenAuth
+
             cls.auth_class = ApiTokenAuth
         return cls.auth_class
 
