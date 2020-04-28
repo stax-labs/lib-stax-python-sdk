@@ -36,18 +36,20 @@ class StaxAuth:
         token = None
         if username and password:
             client = boto3.client(
-                "cognito-idp", region_name=self.aws_region, config=BotoConfig(signature_version=UNSIGNED)
+                "cognito-idp",
+                region_name=self.aws_region,
+                config=BotoConfig(signature_version=UNSIGNED),
             )
             aws = AWSSRP(
                 username=username,
                 password=password,
                 pool_id=self.user_pool,
                 client_id=self.client_id,
-                client=client
+                client=client,
             )
             tokens = aws.authenticate_user()
             # logging.debug(f"TOKEN: {tokens}")
-            token = tokens['AuthenticationResult']['IdToken']
+            token = tokens["AuthenticationResult"]["IdToken"]
         else:
             token = jwt.encode({"sub": "unittest"}, "secret", algorithm="HS256")
         return token
@@ -55,7 +57,9 @@ class StaxAuth:
     def sts_from_cognito_identity_pool(self, token, cognito_client=None):
         if not cognito_client:
             cognito_client = boto3.client(
-                "cognito-identity", region_name=self.aws_region, config=BotoConfig(signature_version=UNSIGNED)
+                "cognito-identity",
+                region_name=self.aws_region,
+                config=BotoConfig(signature_version=UNSIGNED),
             )
         id = cognito_client.get_id(
             IdentityPoolId=self.identity_pool,

@@ -14,6 +14,7 @@ import boto3
 
 from stax.config import Config
 
+
 class StaxTests(unittest.TestCase):
     """
     Inherited class to run all unit tests for this module

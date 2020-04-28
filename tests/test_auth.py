@@ -15,7 +15,10 @@ import jwt
 import botocore
 import logging
 
+from botocore import UNSIGNED
+from botocore.client import Config as BotoConfig
 from botocore.stub import Stubber
+
 from stax.auth import StaxAuth
 
 
@@ -23,8 +26,13 @@ class StaxAuthTests(unittest.TestCase):
     """
     Inherited class to run all unit tests for this module
     """
+
     def setUp(self):
-        self.cognito_client = botocore.session.get_session().create_client("cognito-identity")
+        self.cognito_client = botocore.session.get_session().create_client(
+            "cognito-identity",
+            region_name="ap-southeast-2",
+            config=BotoConfig(signature_version=UNSIGNED),
+        )
         self.cognito_stub = Stubber(self.cognito_client)
 
     def tearDown(self):
@@ -54,21 +62,21 @@ class StaxAuthTests(unittest.TestCase):
         token = sa.id_token_from_cognito()
         jwt_token = jwt.decode(token, verify=False)
         self.stub_cognito_creds(jwt_token.get("sub"))
-        creds = sa.sts_from_cognito_identity_pool(jwt_token.get("sub"), self.cognito_client)
+        creds = sa.sts_from_cognito_identity_pool(
+            jwt_token.get("sub"), self.cognito_client
+        )
         self.assertIn("Credentials", creds)
         self.assertTrue(creds.get("IdentityId").startswith("ap-southeast-2"))
 
     def stub_cognito_creds(self, token: str):
         sa = StaxAuth("ApiAuth")
 
-        id_response = {
-            "IdentityId": "ap-southeast-2"
-        }
+        id_response = {"IdentityId": "ap-southeast-2"}
         id_params = {
             "IdentityPoolId": sa.identity_pool,
             "Logins": {
                 f"cognito-idp.{sa.aws_region}.amazonaws.com/{sa.user_pool}": token
-            }
+            },
         }
         self.cognito_stub.add_response("get_id", id_response, id_params)
 
@@ -78,19 +86,17 @@ class StaxAuthTests(unittest.TestCase):
                 "AccessKeyId": "ASIAX000000000000000",
                 "SecretKey": "0000000000000000000000000000000000000000",
                 "SessionToken": "a-totally-valid-JWT",
-                "Expiration": datetime.datetime(2020, 1, 14, 11, 52, 26)
-            }
+                "Expiration": datetime.datetime(2020, 1, 14, 11, 52, 26),
+            },
         }
         id_creds_params = {
             "IdentityId": id_response["IdentityId"],
             "Logins": {
                 f"cognito-idp.{sa.aws_region}.amazonaws.com/{sa.user_pool}": token
-            }
+            },
         }
         self.cognito_stub.add_response(
-            "get_credentials_for_identity",
-            id_creds_response,
-            id_creds_params
+            "get_credentials_for_identity", id_creds_response, id_creds_params
         )
 
         self.cognito_stub.activate()
