@@ -18,11 +18,11 @@ class Api:
         return cls._requests_auth
 
     @classmethod
-    def get(cls, url_frag, params):
+    def get(cls, url_frag, **kwargs):
         url_frag = url_frag.replace(f"/{Config.API_VERSION}", "")
         url = f"{Config.api_base_url()}/{url_frag.lstrip('/')}"
 
-        response = requests.get(url, auth=cls._auth(), params=params)
+        response = requests.get(url, auth=cls._auth(), **kwargs)
         # logging.debug(f"GET: {response.text}")
         response.raise_for_status()
         return response.json()
