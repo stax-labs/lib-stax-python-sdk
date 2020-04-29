@@ -75,9 +75,10 @@ class StaxClient:
             if method is None:
                 raise Exception(f"No such operation: {method_name}")
 
-            payload = {**kwargs}
+            payload = None
             if method["method"].lower() in ["put", "post"]:
                 # We only validate the payload for POST/PUT routes
+                payload = {**kwargs}
                 StaxContract.validate(payload, method_name)
             # logging.info(f"HTTP: {method_name} {method['path']}")
             # logging.info(f"PAYLOAD: {payload}")
