@@ -82,7 +82,9 @@ class StaxClient:
                 StaxContract.validate(payload, method_name)
             # logging.info(f"HTTP: {method_name} {method['path']}")
             # logging.info(f"PAYLOAD: {payload}")
-            ret = getattr(Api, method["method"])(method["path"], (payload if payload else {**kwargs}))
+            ret = getattr(Api, method["method"])(
+                method["path"], (payload if payload else {**kwargs})
+            )
 
             # logging.info(f"{ret}")
             if "Error" in ret:
