@@ -5,15 +5,10 @@ To run:
 nose2 -v basics
 """
 
-import base64
 import datetime
-import os
-import sys
 import unittest
-import json
 import jwt
 import botocore
-import logging
 
 from botocore import UNSIGNED
 from botocore.client import Config as BotoConfig
