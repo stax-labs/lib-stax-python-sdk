@@ -18,7 +18,7 @@ class Api:
         return cls._requests_auth
 
     @classmethod
-    def get(cls, url_frag, **kwargs):
+    def get(cls, url_frag, *args, **kwargs):
         url_frag = url_frag.replace(f"/{Config.API_VERSION}", "")
         url = f"{Config.api_base_url()}/{url_frag.lstrip('/')}"
 
@@ -53,10 +53,10 @@ class Api:
         return response.json()
 
     @classmethod
-    def delete(cls, url_frag, **kwargs):
+    def delete(cls, url_frag, *args, **kwargs):
         url_frag = url_frag.replace(f"/{Config.API_VERSION}", "")
         url = f"{Config.api_base_url()}/{url_frag.lstrip('/')}"
 
-        response = requests.delete(url, auth=cls._auth())
+        response = requests.delete(url, auth=cls._auth(), **kwargs)
         response.raise_for_status()
         return response.json()

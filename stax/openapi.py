@@ -76,10 +76,12 @@ class StaxClient:
                 raise Exception(f"No such operation: {method_name}")
 
             payload = {**kwargs}
-            StaxContract.validate(payload, method_name)
+            if method["method"].lower() in ["put", "post"]:
+                # We only validate the payload for POST/PUT routes
+                StaxContract.validate(payload, method_name)
             # logging.info(f"HTTP: {method_name} {method['path']}")
             # logging.info(f"PAYLOAD: {payload}")
-            ret = getattr(Api, method["method"])(method["path"], payload)
+            ret = getattr(Api, method["method"])(method["path"], (payload if payload else {**kwargs}))
 
             # logging.info(f"{ret}")
             if "Error" in ret:
