@@ -5,10 +5,7 @@ To run:
 nose2 -v basics
 """
 
-import os
-import sys
 import unittest
-import json
 import responses
 import requests
 
