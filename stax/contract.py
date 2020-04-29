@@ -54,7 +54,7 @@ class StaxContract:
                 raise cls.ValidationException(f"SCHEMA: Does not contain {component}")
 
     @staticmethod
-    def default_swagger_template(hostname: str = "localhost") -> dict:
+    def default_swagger_template(hostname: str = "localhost", test_mode=False) -> dict:
         # swagger doesn't understand $refs that are not relative to the doc,
         # so we replace all the canonical $refs with local markers
         def ref_update(obj):
@@ -93,6 +93,8 @@ class StaxContract:
                 "requestBodies": dict(),
             },
         )
+        if test_mode:
+            return template
 
         schema_dir = os.path.dirname(os.path.realpath(__file__)) + "/.."
         for schema_type in ["models", "definitions", "responses", "requests"]:
