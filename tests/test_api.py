@@ -40,7 +40,7 @@ class StaxApiTests(unittest.TestCase):
             json=response_dict,
             status=200,
         )
-        response = self.Api.get("/test/get/200")
+        response = self.Api.get("/test/get/200", {})
         self.assertEqual(response, response_dict)
 
     @responses.activate
@@ -56,7 +56,7 @@ class StaxApiTests(unittest.TestCase):
             status=200,
         )
         params = {"test_param": "unit"}
-        response = self.Api.get("/test/get/200", params=params)
+        response = self.Api.get("/test/get/200", params)
         self.assertEqual(response, response_dict)
 
     @responses.activate
@@ -71,7 +71,7 @@ class StaxApiTests(unittest.TestCase):
             HTTPError("Failed GET"),
         )
         with self.assertRaises(requests.exceptions.HTTPError):
-            self.Api.get("/test/get/exception")
+            self.Api.get("/test/get/exception", {})
 
     @responses.activate
     def testPost(self):
@@ -171,7 +171,7 @@ class StaxApiTests(unittest.TestCase):
             json=response_dict,
             status=200,
         )
-        response = self.Api.delete("/test/delete/200")
+        response = self.Api.delete("/test/delete/200", {})
         self.assertEqual(response, response_dict)
 
     @responses.activate
@@ -186,7 +186,7 @@ class StaxApiTests(unittest.TestCase):
             HTTPError("Failed DELETE"),
         )
         with self.assertRaises(requests.exceptions.HTTPError):
-            self.Api.delete("/test/delete/exception")
+            self.Api.delete("/test/delete/exception", {})
 
 
 if __name__ == "__main__":

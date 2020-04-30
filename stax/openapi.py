@@ -56,10 +56,11 @@ class StaxClient:
     def _map_paths_to_operations(cls):
         cls._load_schema()
         for path_name, path in cls._schema["paths"].items():
-            base_path = ""
+            base_path = path_name
             parameters = []
 
             if "{" in path_name:
+                base_path = ""
                 path_parts = path_name.split("/")
                 for part in path_parts:
                     if "{" in part:
@@ -107,7 +108,7 @@ class StaxClient:
                 StaxContract.validate(payload, method_name)
             # logging.info(f"HTTP: {method_name} {method['path']}")
             # logging.info(f"PAYLOAD: {payload}")
-            ret = getattr(Api, method["method"])(f'{method["path"]}{parameters}', (payload if payload else {**kwargs}))
+            ret = getattr(Api, method["method"])(f'{method["path"]}{parameters}', payload)
 
             # logging.info(f"{ret}")
             if "Error" in ret:
