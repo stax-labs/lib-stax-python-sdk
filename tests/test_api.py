@@ -56,7 +56,7 @@ class StaxApiTests(unittest.TestCase):
             status=200,
         )
         params = {"test_param": "unit"}
-        response = self.Api.get("/test/get/200", params=params)
+        response = self.Api.get("/test/get/200", params)
         self.assertEqual(response, response_dict)
 
     @responses.activate
