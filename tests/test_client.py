@@ -67,7 +67,7 @@ class StaxClientTests(unittest.TestCase):
             status=200,
         )
         params = {"Unit": "Test"}
-        response = self.client.ReadAccounts(params=params)
+        response = self.client.ReadAccounts(**params)
         self.assertEqual(response, response_dict)
 
         # Test a valid POST
