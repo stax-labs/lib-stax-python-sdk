@@ -87,7 +87,3 @@ class StaxContract:
         )
 
         return template
-
-
-if __name__ == "__main__":
-    print(json.dumps(StaxContract.default_swagger_template(), indent=4))
