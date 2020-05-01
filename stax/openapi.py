@@ -9,7 +9,7 @@ from prance import ResolvingParser
 
 from stax.api import Api
 from stax.auth import ApiTokenAuth
-from stax.config import Config
+from stax.config import ApiException, Config
 from stax.contract import StaxContract
 
 
@@ -56,14 +56,13 @@ class StaxClient:
     def _map_paths_to_operations(cls):
         cls._load_schema()
         for path_name, path in cls._schema["paths"].items():
-            base_path = path_name
-            new_parameters = []
-
+            parameters = []
             base_path=""
             path_parts = path_name.split("/")
+            
             for part in path_parts:
                 if "{" in part:
-                    new_parameters.append(part.replace("{", "").replace("}", ""))
+                    parameters.append(part.replace("{", "").replace("}", ""))
                 else:
                     base_path = f"{base_path}/{part}"
 
@@ -71,19 +70,20 @@ class StaxClient:
                 method = path[method_type]
                 operation = method.get("operationId", "").split(".")
 
-                if len(operation) < 2:
-                    # logging.info(f"PATH: {path}:{method_type} has no operationId =(")
+                if len(operation) != 2:
                     continue
+                
                 api_class = operation[0]
                 method_name = operation[1]
-                parameters = cls._operation_map.get(api_class, {}).get(method_name,{}).get("parameters", [])
-                parameters.extend(new_parameters)
+
                 if not cls._operation_map.get(api_class) :
                     cls._operation_map[api_class] = dict()
                 cls._operation_map[api_class][method_name] = dict()
                 cls._operation_map[api_class][method_name]["path"] = base_path
                 cls._operation_map[api_class][method_name]["method"] = method_type
-                cls._operation_map[api_class][method_name]["parameters"] = parameters
+                if len(parameters) > len(cls._operation_map[api_class][method_name].get("parameters",[])):
+                    cls._operation_map[api_class][method_name]["parameters"] = parameters
+
 
     def __getattr__(self, name):
         self.name = name
@@ -95,23 +95,25 @@ class StaxClient:
                 raise StaxContract.ValidationException(f"No such operation: {self.name} for {self.classname}. Please use one of {list(self._operation_map[self.classname])}")
             payload = {**kwargs}
             parameters=""
-            missing_parameter = None
+            preceding_parameter = False
+            # All parameters starting with the most dependant
+            all_schema_parameters = self._operation_map[self.classname][self.name].get("parameters", [])
             # Get any parameters from the keyword args and remove them from the payload
-            for parameter in self._operation_map[self.classname][self.name].get("parameters", []):
+            for parameter in all_schema_parameters[::-1]:
                 if parameter in payload:
-                    if missing_parameter:
-                        raise StaxContract.ValidationException(f"Missing parameter: {missing_parameter}")
-                    parameters= f"{parameters}/{payload.pop(parameter, None)}"
-                else:
-                    missing_parameter = parameter
+                    parameters= f"/{payload.pop(parameter, None)}{parameters}"
+                    preceding_parameter = True
+                elif preceding_parameter:
+                    raise StaxContract.ValidationException(f"Missing parameter: {parameter}")
+ 
+
             if method["method"].lower() in ["put", "post"]:
                 # We only validate the payload for POST/PUT routes
                 StaxContract.validate(payload, method_name)
 
             ret = getattr(Api, method["method"])(f'{method["path"]}{parameters}', payload)
-
             if "Error" in ret:
-                raise Exception(f"{ret['Error']}")
+                raise ApiException(f"Api Exception: {ret['Error']}")
 
             return ret
 

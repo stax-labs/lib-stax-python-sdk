@@ -34,16 +34,12 @@ class Config:
 
     @classmethod
     def set_config(cls):
-        if cls.branch() == "master":
-            cls.base_url = f"https://api.{cls.STAX_REGION}/{cls.API_VERSION}"
-        else:
-            cls.base_url = f"https://api.dev-{cls.branch()}.{cls.STAX_REGION}/{cls.API_VERSION}"
-        
-        config_url = cls.api_base_url() + "/public/config"
+        cls.base_url = f"https://api.{cls.STAX_REGION}/{cls.API_VERSION}"
+        config_url = f'{cls.api_base_url()}/public/config'
         config_response = requests.get(config_url)
         # logging.debug(f"IDAM: get config from {config_url}")
         if(config_response.json().get('Error')):
-            raise cls.ApiException(f'Could not configure sdk. Error is {config_response.json()["Error"]}')
+            raise ApiException(f'Could not load API config. Error is {config_response.json()["Error"]}')
         cls.api_config = config_response.json()
 
     @classmethod
@@ -76,6 +72,5 @@ class Config:
 
             cls.auth_class = ApiTokenAuth
         return cls.auth_class
-
 
 Config.init()
