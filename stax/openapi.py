@@ -57,33 +57,33 @@ class StaxClient:
         cls._load_schema()
         for path_name, path in cls._schema["paths"].items():
             base_path = path_name
-            parameters = []
+            new_parameters = []
 
-            if "{" in path_name:
-                base_path=""
-                path_parts = path_name.split("/")
-                for part in path_parts:
-                    if "{" in part:
-                        parameters.append(part.replace("{", "").replace("}", ""))
-                    else:
-                        base_path = f"{base_path}/{part}"
+            base_path=""
+            path_parts = path_name.split("/")
+            for part in path_parts:
+                if "{" in part:
+                    new_parameters.append(part.replace("{", "").replace("}", ""))
+                else:
+                    base_path = f"{base_path}/{part}"
 
             for method_type, method in path.items():
                 method = path[method_type]
                 operation = method.get("operationId", "").split(".")
-                
+
                 if len(operation) < 2:
                     # logging.info(f"PATH: {path}:{method_type} has no operationId =(")
                     continue
                 api_class = operation[0]
                 method_name = operation[1]
+                parameters = cls._operation_map.get(api_class, {}).get(method_name,{}).get("parameters", [])
+                parameters.extend(new_parameters)
                 if not cls._operation_map.get(api_class) :
                     cls._operation_map[api_class] = dict()
                 cls._operation_map[api_class][method_name] = dict()
                 cls._operation_map[api_class][method_name]["path"] = base_path
                 cls._operation_map[api_class][method_name]["method"] = method_type
-                if len(parameters) > 0:
-                    cls._operation_map[api_class][method_name]["parameters"] = parameters
+                cls._operation_map[api_class][method_name]["parameters"] = parameters
 
     def __getattr__(self, name):
         self.name = name
@@ -93,17 +93,17 @@ class StaxClient:
             method = self._operation_map[self.classname].get(self.name)
             if method is None:
                 raise StaxContract.ValidationException(f"No such operation: {self.name} for {self.classname}. Please use one of {list(self._operation_map[self.classname])}")
-            
+            payload = {**kwargs}
             parameters=""
             missing_parameter = None
+            # Get any parameters from the keyword args and remove them from the payload
             for parameter in self._operation_map[self.classname][self.name].get("parameters", []):
-                if parameter in kwargs:
+                if parameter in payload:
                     if missing_parameter:
                         raise StaxContract.ValidationException(f"Missing parameter: {missing_parameter}")
-                    parameters= f"{parameters}/{kwargs[parameter]}"
+                    parameters= f"{parameters}/{payload.pop(parameter, None)}"
                 else:
                     missing_parameter = parameter
-            payload = {**kwargs}
             if method["method"].lower() in ["put", "post"]:
                 # We only validate the payload for POST/PUT routes
                 StaxContract.validate(payload, method_name)
