@@ -65,7 +65,7 @@ class StaxContract:
                     obj[key] = obj[key].replace("/models/", "/components/schemas/")
                     obj[key] = obj[key].replace("/definitions/", "/components/schemas/")
                     # transform global refs to local relative
-                    obj[key] = obj[key].replace("http://staxapp.cloud", "#")
+                    obj[key] = obj[key].replace("https://staxapp.cloud", "#")
             return obj
 
         template = dict(
