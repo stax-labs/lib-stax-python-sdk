@@ -1,7 +1,10 @@
 import json
 import logging
 import os
+import requests
 from contextlib import suppress
+
+from stax.config import Config
 
 from jsonschema import validate as json_validate
 from prance import ResolvingParser
@@ -54,20 +57,9 @@ class StaxContract:
                 raise cls.ValidationException(f"SCHEMA: Does not contain {component}")
 
     @staticmethod
-    def default_swagger_template(hostname: str = "localhost", test_mode=False) -> dict:
-        # swagger doesn't understand $refs that are not relative to the doc,
-        # so we replace all the canonical $refs with local markers
-        def ref_update(obj):
-            with suppress(KeyError):
-                del obj["$id"]
-            for key in obj.keys():
-                if key == "$ref":
-                    obj[key] = obj[key].replace("/models/", "/components/schemas/")
-                    obj[key] = obj[key].replace("/definitions/", "/components/schemas/")
-                    # transform global refs to local relative
-                    obj[key] = obj[key].replace("https://staxapp.cloud", "#")
-            return obj
-
+    def default_swagger_template() -> dict:
+        # Get the default swagger template from https://api.au1.staxapp.cloud/20190206/public/api-document
+        schema = requests.get(Config.schema_url()).json()
         template = dict(
             openapi="3.0.0",
             info={
@@ -77,7 +69,7 @@ class StaxContract:
                 "termsOfService": "/there_is_no_tos",
                 "contact": {"url": "https://stax.io"},
             },
-            servers=[{"url": f"https://api.{hostname}"}],
+            servers=[{"url": f"https://{Config.hostname}"}],
             paths=dict(),
             components={
                 "securitySchemes": {
@@ -88,39 +80,14 @@ class StaxContract:
                         "x-amazon-apigateway-authtype": "awsSigv4",
                     }
                 },
-                "schemas": dict(),
+                "schemas": schema,
                 "responses": dict(),
                 "requestBodies": dict(),
             },
         )
-        if test_mode:
-            return template
-
-        schema_dir = os.path.dirname(os.path.realpath(__file__)) + "/.."
-        for schema_type in ["models", "definitions", "responses", "requests"]:
-            for schema_path in os.listdir(f"{schema_dir}/{schema_type}"):
-                if not schema_path.endswith(".json"):
-                    continue
-                with open(
-                    f"{schema_dir}/{schema_type}/{schema_path}", "rb"
-                ) as schema_file:
-                    # logging.debug(f"SCHEMA: loading {schema_type} {schema_path}")
-                    schema = json.load(schema_file, object_hook=ref_update)
-                    # logging.debug(f"SCHEMA: {schema}")
-                    with suppress(KeyError):
-                        del schema["$id"]
-                    with suppress(KeyError):
-                        del schema["$ref"]
-                    with suppress(KeyError):
-                        del schema["$schema"]
-                    template["components"]["schemas"].update(schema)
 
         return template
 
 
 if __name__ == "__main__":
-    print(
-        json.dumps(
-            StaxContract.default_swagger_template(hostname="localhost"), indent=4
-        )
-    )
+    print(json.dumps(StaxContract.default_swagger_template(), indent=4))

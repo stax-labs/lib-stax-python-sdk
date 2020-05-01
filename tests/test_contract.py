@@ -17,8 +17,9 @@ class StaxContractTests(unittest.TestCase):
 
     def testDefaultContract(self):
         self.StaxContract = StaxContract
-        schema = self.StaxContract.default_swagger_template(test_mode=True)
+        schema = self.StaxContract.default_swagger_template()
         self.assertEqual(schema.get("info").get("title"), "Stax Core API")
+        self.assertIsInstance(schema.get("components").get("schemas"), dict)
 
 
 if __name__ == "__main__":

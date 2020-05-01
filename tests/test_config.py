@@ -56,6 +56,7 @@ class StaxConfigTests(unittest.TestCase):
             self.Config.schema_url(),
             f"https://api-{self.Config.branch()}.{self.Config.STAX_REGION}/{self.Config.API_VERSION}/public/api-document",
         )
+        del os.environ["BRANCH"]
 
     def testAuth(self):
         """
