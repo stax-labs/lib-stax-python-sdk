@@ -9,7 +9,7 @@ from prance import ResolvingParser
 
 from stax.api import Api
 from stax.auth import ApiTokenAuth
-from stax.config import Config
+from stax.config import ApiException, Config
 from stax.contract import StaxContract
 
 
@@ -25,8 +25,10 @@ class StaxClient:
         if not self._initialized:
             self._map_paths_to_operations()
             StaxContract.set_schema(self._schema)
-            self._initialized = True
             # logging.info(f"{self._operation_map}")
+            if not self._operation_map.get(self.classname):
+                raise StaxContract.ValidationException(f"No such class: {self.classname}. Please use one of {list(self._operation_map)}")
+            self._initialized = True
 
         if lambda_client:
             self.lambda_client = lambda_client
@@ -54,38 +56,64 @@ class StaxClient:
     def _map_paths_to_operations(cls):
         cls._load_schema()
         for path_name, path in cls._schema["paths"].items():
-            if "{" in path_name:
-                continue
+            parameters = []
+            base_path=""
+            path_parts = path_name.split("/")
+            
+            for part in path_parts:
+                if "{" in part:
+                    parameters.append(part.replace("{", "").replace("}", ""))
+                else:
+                    base_path = f"{base_path}/{part}"
+
             for method_type, method in path.items():
                 method = path[method_type]
-                operation = method.get("operationId")
-                if operation is None:
-                    # logging.info(f"PATH: {path}:{method_type} has no operationId =(")
+                operation = method.get("operationId", "").split(".")
+
+                if len(operation) != 2:
                     continue
-                cls._operation_map[operation] = dict()
-                cls._operation_map[operation]["path"] = path_name
-                cls._operation_map[operation]["method"] = method_type
+                
+                api_class = operation[0]
+                method_name = operation[1]
+
+                if not cls._operation_map.get(api_class) :
+                    cls._operation_map[api_class] = dict()
+                cls._operation_map[api_class][method_name] = dict()
+                cls._operation_map[api_class][method_name]["path"] = base_path
+                cls._operation_map[api_class][method_name]["method"] = method_type
+                if len(parameters) > len(cls._operation_map[api_class][method_name].get("parameters",[])):
+                    cls._operation_map[api_class][method_name]["parameters"] = parameters
+
 
     def __getattr__(self, name):
         self.name = name
 
         def stax_wrapper(*args, **kwargs):
             method_name = f"{self.classname}.{self.name}"
-            method = self._operation_map.get(method_name)
+            method = self._operation_map[self.classname].get(self.name)
             if method is None:
-                raise Exception(f"No such operation: {method_name}")
-
+                raise StaxContract.ValidationException(f"No such operation: {self.name} for {self.classname}. Please use one of {list(self._operation_map[self.classname])}")
             payload = {**kwargs}
+            parameters=""
+            preceding_parameter = False
+            # All parameters starting with the most dependant
+            all_schema_parameters = self._operation_map[self.classname][self.name].get("parameters", [])
+            # Get any parameters from the keyword args and remove them from the payload
+            for parameter in all_schema_parameters[::-1]:
+                if parameter in payload:
+                    parameters= f"/{payload.pop(parameter, None)}{parameters}"
+                    preceding_parameter = True
+                elif preceding_parameter:
+                    raise StaxContract.ValidationException(f"Missing parameter: {parameter}")
+ 
+
             if method["method"].lower() in ["put", "post"]:
                 # We only validate the payload for POST/PUT routes
                 StaxContract.validate(payload, method_name)
-            # logging.info(f"HTTP: {method_name} {method['path']}")
-            # logging.info(f"PAYLOAD: {payload}")
-            ret = getattr(Api, method["method"])(method["path"], payload)
 
-            # logging.info(f"{ret}")
+            ret = getattr(Api, method["method"])(f'{method["path"]}{parameters}', payload)
             if "Error" in ret:
-                raise Exception(f"{ret['Error']}")
+                raise ApiException(f"Api Exception: {ret['Error']}")
 
             return ret
 

@@ -7,19 +7,35 @@ nose2 -v basics
 
 import os
 import unittest
+import responses
+import requests
 
-from stax.config import Config
 from stax.auth import ApiTokenAuth
+from stax.config import ApiException, Config
 
 
 class StaxConfigTests(unittest.TestCase):
     """
     Inherited class to run all unit tests for this module
     """
-
     def setUp(self):
         self.Config = Config
+        self.Config.init()
         self.assertTrue(self.Config._initialized)
+
+    @responses.activate
+    def testConfigError(self):
+        response_dict = {"Error": "Unittest"}
+        responses.add(
+            responses.GET,
+            f"https://api.au1.staxapp.cloud/20190206/public/config",
+            json=response_dict,
+            status=200,
+        )
+        self.Config._initialized = False
+        with self.assertRaises(ApiException):
+            self.Config.init()
+       
 
     def testConfig(self):
         """
@@ -27,7 +43,7 @@ class StaxConfigTests(unittest.TestCase):
         """
         self.assertEqual(self.Config.STAX_REGION, "au1.staxapp.cloud")
         self.assertEqual(self.Config.API_VERSION, "20190206")
-
+    
     def testBaseUrl(self):
         """
         Test base url is returned
@@ -45,18 +61,10 @@ class StaxConfigTests(unittest.TestCase):
         """
         Test schema url is returned
         """
-        # Test master branch
         self.assertEqual(
             self.Config.schema_url(),
-            f"https://api.{self.Config.STAX_REGION}/{self.Config.API_VERSION}/public/api-document",
+            f"{Config.api_base_url()}/public/api-document",
         )
-        # Test feature branch
-        os.environ["BRANCH"] = "unittest"
-        self.assertEqual(
-            self.Config.schema_url(),
-            f"https://api-{self.Config.branch()}.{self.Config.STAX_REGION}/{self.Config.API_VERSION}/public/api-document",
-        )
-        del os.environ["BRANCH"]
 
     def testAuth(self):
         """
