@@ -161,7 +161,7 @@ class StaxApiTests(unittest.TestCase):
         )
         payload = {"Unit": "Test"}
         with self.assertRaises(ApiException):
-            response = self.Api.put("/test/put/400", payload)
+            self.Api.put("/test/put/400", payload)
 
     @responses.activate
     def testDelete(self):
@@ -194,6 +194,41 @@ class StaxApiTests(unittest.TestCase):
         with self.assertRaises(ApiException):
             self.Api.delete("/test/delete/exception")
 
+    @responses.activate
+    def testFailedApiException(self):
+        """
+        Test all paths of ApiException
+        """
+        # Test Exception with no error in response
+        response_dict = {}
+        responses.add(
+            responses.GET,
+            f"{Config.api_base_url()}/test/no/error",
+            json=response_dict,
+            status=500,
+        )
+        with self.assertRaises(ApiException):
+            self.Api.get("/test/no/error")
+        
+		# Test an exception which has no json in response
+        responses.add(
+            responses.GET,
+            f"{Config.api_base_url()}/test/invalid/json",
+            body='<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n<title>405 Method Not Allowed</title>\n<h1>Method Not Allowed</h1>\n<p>The method is not allowed for the requested URL.</p>\n',
+            status=405,
+        )
+        with self.assertRaises(ApiException):
+            self.Api.get("/test/invalid/json")
+		
+        # Test an exception with no content
+        responses.add(
+            responses.GET,
+            f"{Config.api_base_url()}/test/no/content",
+            status=500,
+        )
+        with self.assertRaises(ApiException):
+            self.Api.get("/test/no/content")
+        
 
 if __name__ == "__main__":
     unittest.main()

@@ -23,8 +23,6 @@ class Api:
         try:
             response.raise_for_status()
         except requests.exceptions.HTTPError as e:
-            logging.error(f"{response.status_code}: {response.json()}")
-
             raise ApiException(str(e), response)
 
     @classmethod
