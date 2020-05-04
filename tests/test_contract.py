@@ -8,6 +8,7 @@ nose2 -v basics
 import unittest
 
 from stax.contract import StaxContract
+from stax.exceptions import ValidationException
 
 
 class StaxContractTests(unittest.TestCase):
@@ -42,11 +43,11 @@ class StaxContractTests(unittest.TestCase):
         """
         data = "unit"
         component = "accounts.ReadAccounts"
-        with self.assertRaises(StaxContract.ValidationException):
+        with self.assertRaises(ValidationException):
             self.StaxContract.validate(data, component)
 
         component = "unit"
-        with self.assertRaises(StaxContract.ValidationException):
+        with self.assertRaises(ValidationException):
             self.StaxContract.validate(data, component)
 
 

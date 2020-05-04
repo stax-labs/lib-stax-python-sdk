@@ -2,6 +2,7 @@ import logging
 import os
 
 import requests
+from stax.exceptions import ApiException
 
 logging.getLogger().setLevel(logging.DEBUG)
 logging.getLogger("boto3").setLevel(logging.WARNING)
@@ -9,9 +10,6 @@ logging.getLogger("botocore").setLevel(logging.WARNING)
 logging.getLogger("nose").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 
-class ApiException(Exception):
-    def __init__(self, message):
-        self.message = message
 class Config:
     """
     Insert doco here
@@ -38,8 +36,12 @@ class Config:
         config_url = f'{cls.api_base_url()}/public/config'
         config_response = requests.get(config_url)
         # logging.debug(f"IDAM: get config from {config_url}")
-        if(config_response.json().get('Error')):
-            raise ApiException(f'Could not load API config. Error is {config_response.json()["Error"]}')
+        try:
+            config_response.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            logging.error(f"{config_response.status_code}: {config_response.json()}")
+            raise ApiException(str(e), config_response, detail='Could not load API config.')
+        
         cls.api_config = config_response.json()
 
     @classmethod

@@ -11,7 +11,7 @@ import unittest
 from stax.api import Api
 from stax.config import Config
 from stax.openapi import StaxClient
-from stax.contract import StaxContract
+from stax.exceptions import ApiException, ValidationException
 
 
 class StaxClientTests(unittest.TestCase):
@@ -113,13 +113,14 @@ class StaxClientTests(unittest.TestCase):
             status=400,
         )
         # Test an error occurs when the wrong client is used
-        with self.assertRaises(StaxContract.ValidationException):
+        with self.assertRaises(ValidationException):
             self.account_client.ReadCatalogueVersion(catalogue_id='fake-id', version_id='fake-id')
         # Test an error occurs when a parameter is missing
-        with self.assertRaises(StaxContract.ValidationException):
+        with self.assertRaises(ValidationException):
             self.workload_client.ReadCatalogueVersion(version_id='fake-id/fake-id')
         # Test an error occurs when error in response
-        #Todo
+        with self.assertRaises(ApiException):
+            self.workload_client.ReadCatalogueVersion(catalogue_id='fake-id', version_id='fake-id')
 
 if __name__ == "__main__":
     unittest.main()

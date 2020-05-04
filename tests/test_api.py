@@ -9,10 +9,9 @@ import unittest
 import responses
 import requests
 
-from requests.exceptions import HTTPError
-
 from stax.config import Config
 from stax.api import Api
+from stax.exceptions import ApiException
 
 
 class StaxApiTests(unittest.TestCase):
@@ -68,9 +67,10 @@ class StaxApiTests(unittest.TestCase):
         responses.add(
             responses.GET,
             f"{Config.api_base_url()}/test/get/exception",
-            HTTPError("Failed GET"),
+            json={"Error": "Unit test failed get"},
+            status=500,
         )
-        with self.assertRaises(requests.exceptions.HTTPError):
+        with self.assertRaises(ApiException):
             self.Api.get("/test/get/exception")
 
     @responses.activate
@@ -95,13 +95,15 @@ class StaxApiTests(unittest.TestCase):
         Test failed POST route
         """
         # Test HTTP exception
+        response_dict={"Error": "Unit Test server error for post"}
         responses.add(
             responses.POST,
             f"{Config.api_base_url()}/test/post/exception",
-            HTTPError("Failed POST"),
+            json=response_dict,
+            status=500,
         )
         payload = {"Unit": "Test"}
-        with self.assertRaises(requests.exceptions.HTTPError):
+        with self.assertRaises(ApiException):
             self.Api.post("/test/post/exception", payload)
 
         # Test 400 response
@@ -113,8 +115,9 @@ class StaxApiTests(unittest.TestCase):
             status=400,
         )
         payload = {"Unit": "Test"}
-        response = self.Api.post("/test/post/400", payload)
-        self.assertEqual(response, response_dict)
+        with self.assertRaises(ApiException):
+            response = self.Api.post("/test/post/400", payload)
+            self.assertEqual(response, response_dict)
 
     @responses.activate
     def testPut(self):
@@ -138,13 +141,15 @@ class StaxApiTests(unittest.TestCase):
         Test failed PUT route
         """
         # Test HTTP exception
+        response_dict = {"Error" : "Unit test server error for put"}
         responses.add(
             responses.PUT,
             f"{Config.api_base_url()}/test/put/exception",
-            HTTPError("Failed PUT"),
+            json=response_dict,
+            status=500,
         )
         payload = {"Unit": "Test"}
-        with self.assertRaises(requests.exceptions.HTTPError):
+        with self.assertRaises(ApiException):
             self.Api.put("/test/put/exception", payload)
 
         # Test 400 response
@@ -156,8 +161,8 @@ class StaxApiTests(unittest.TestCase):
             status=400,
         )
         payload = {"Unit": "Test"}
-        response = self.Api.put("/test/put/400", payload)
-        self.assertEqual(response, response_dict)
+        with self.assertRaises(ApiException):
+            response = self.Api.put("/test/put/400", payload)
 
     @responses.activate
     def testDelete(self):
@@ -180,12 +185,14 @@ class StaxApiTests(unittest.TestCase):
         Test failed DELETE route
         """
         # Test HTTP exception
+        response_dict = {"Error": "Unit test server error for delete"}
         responses.add(
             responses.DELETE,
             f"{Config.api_base_url()}/test/delete/exception",
-            HTTPError("Failed DELETE"),
+            json=response_dict,
+            status=500,
         )
-        with self.assertRaises(requests.exceptions.HTTPError):
+        with self.assertRaises(ApiException):
             self.Api.delete("/test/delete/exception")
 
 

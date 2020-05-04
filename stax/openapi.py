@@ -9,8 +9,9 @@ from prance import ResolvingParser
 
 from stax.api import Api
 from stax.auth import ApiTokenAuth
-from stax.config import ApiException, Config
+from stax.config import Config
 from stax.contract import StaxContract
+from stax.exceptions import ValidationException
 
 
 class StaxClient:
@@ -27,7 +28,7 @@ class StaxClient:
             StaxContract.set_schema(self._schema)
             # logging.info(f"{self._operation_map}")
             if not self._operation_map.get(self.classname):
-                raise StaxContract.ValidationException(f"No such class: {self.classname}. Please use one of {list(self._operation_map)}")
+                raise ValidationException(f"No such class: {self.classname}. Please use one of {list(self._operation_map)}")
             self._initialized = True
 
         if lambda_client:
@@ -92,7 +93,7 @@ class StaxClient:
             method_name = f"{self.classname}.{self.name}"
             method = self._operation_map[self.classname].get(self.name)
             if method is None:
-                raise StaxContract.ValidationException(f"No such operation: {self.name} for {self.classname}. Please use one of {list(self._operation_map[self.classname])}")
+                raise ValidationException(f"No such operation: {self.name} for {self.classname}. Please use one of {list(self._operation_map[self.classname])}")
             payload = {**kwargs}
             parameters=""
             preceding_parameter = False
@@ -104,17 +105,13 @@ class StaxClient:
                     parameters= f"/{payload.pop(parameter, None)}{parameters}"
                     preceding_parameter = True
                 elif preceding_parameter:
-                    raise StaxContract.ValidationException(f"Missing parameter: {parameter}")
+                    raise ValidationException(f"Missing parameter: {parameter}")
  
 
             if method["method"].lower() in ["put", "post"]:
                 # We only validate the payload for POST/PUT routes
                 StaxContract.validate(payload, method_name)
-
             ret = getattr(Api, method["method"])(f'{method["path"]}{parameters}', payload)
-            if "Error" in ret:
-                raise ApiException(f"Api Exception: {ret['Error']}")
-
             return ret
 
         return stax_wrapper

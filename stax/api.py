@@ -4,6 +4,7 @@ import logging
 import requests
 
 from stax.config import Config
+from stax.exceptions import ApiException
 
 
 class Api:
@@ -17,6 +18,15 @@ class Api:
             )
         return cls._requests_auth
 
+    @staticmethod
+    def handle_api_response(response):
+        try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            logging.error(f"{response.status_code}: {response.json()}")
+
+            raise ApiException(str(e), response)
+
     @classmethod
     def get(cls, url_frag, params={}, **kwargs):
         url_frag = url_frag.replace(f"/{Config.API_VERSION}", "")
@@ -24,20 +34,16 @@ class Api:
 
         response = requests.get(url, auth=cls._auth(), params=params, **kwargs)
         # logging.debug(f"GET: {response.text}")
-        response.raise_for_status()
+        cls.handle_api_response(response)
         return response.json()
 
     @classmethod
     def post(cls, url_frag, payload={}, **kwargs):
         url_frag = url_frag.replace(f"/{Config.API_VERSION}", "")
         url = f"{Config.api_base_url()}/{url_frag.lstrip('/')}"
-
         response = requests.post(url, json=payload, auth=cls._auth(), **kwargs)
         # logging.debug(f"POST: {response.text}")
-        if response.status_code == 400:
-            logging.error(f"400: {response.json()}")
-        else:
-            response.raise_for_status()
+        cls.handle_api_response(response)
         return response.json()
 
     @classmethod
@@ -46,10 +52,7 @@ class Api:
         url = f"{Config.api_base_url()}/{url_frag.lstrip('/')}"
 
         response = requests.put(url, json=payload, auth=cls._auth(), **kwargs)
-        if response.status_code == 400:
-            logging.error(f"400: {response.json()}")
-        else:
-            response.raise_for_status()
+        cls.handle_api_response(response)
         return response.json()
 
     @classmethod
@@ -58,5 +61,5 @@ class Api:
         url = f"{Config.api_base_url()}/{url_frag.lstrip('/')}"
 
         response = requests.delete(url, auth=cls._auth(), params=params, **kwargs)
-        response.raise_for_status()
+        cls.handle_api_response(response)
         return response.json()

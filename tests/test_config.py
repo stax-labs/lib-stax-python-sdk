@@ -11,8 +11,8 @@ import responses
 import requests
 
 from stax.auth import ApiTokenAuth
-from stax.config import ApiException, Config
-
+from stax.config import Config
+from stax.exceptions import ApiException
 
 class StaxConfigTests(unittest.TestCase):
     """
@@ -30,7 +30,7 @@ class StaxConfigTests(unittest.TestCase):
             responses.GET,
             f"https://api.au1.staxapp.cloud/20190206/public/config",
             json=response_dict,
-            status=200,
+            status=500,
         )
         self.Config._initialized = False
         with self.assertRaises(ApiException):

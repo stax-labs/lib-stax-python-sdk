@@ -5,6 +5,7 @@ import requests
 from contextlib import suppress
 
 from stax.config import Config
+from stax.exceptions import ValidationException
 
 from jsonschema import validate as json_validate
 from prance import ResolvingParser
@@ -15,11 +16,6 @@ logging.getLogger("openapi_spec_validator.validators").setLevel(logging.WARNING)
 class StaxContract:
     _swagger_doc = None
     _resolved_schema = None
-
-    class ValidationException(Exception):
-        def __init__(self, message):
-            # logging.info(f"VALIDATE: {message}")
-            self.message = message
 
     @staticmethod
     def resolve_schema_refs(schema) -> dict:
@@ -52,9 +48,9 @@ class StaxContract:
                 try:
                     json_validate(instance=data, schema=schemas[component])
                 except Exception as err:
-                    raise cls.ValidationException(str(err))
+                    raise ValidationException(str(err))
             else:
-                raise cls.ValidationException(f"SCHEMA: Does not contain {component}")
+                raise ValidationException(f"SCHEMA: Does not contain {component}")
 
     @staticmethod
     def default_swagger_template() -> dict:
