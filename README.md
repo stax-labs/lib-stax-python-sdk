@@ -1,7 +1,7 @@
 # Stax SDK for Python
 `staxapp` is the [Stax](https://stax.io) Software Development Kit (SDK) for Python, allowing users to interact with the Stax platform.
 
-![Build](https://github.com/stax-labs/lib-stax-python-sdk/workflows/Build/badge.svg)
+![Build](https://github.com/stax-labs/lib-stax-python-sdk/workflows/build/badge.svg)
 
 ## Authentication
 In order to use the Stax SDK for Python, you will need a valid [Stax API Token](https://www.stax.io/docs/stax_team/access_stax_api_with_an_api_token/).
