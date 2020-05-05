@@ -1,4 +1,4 @@
-name: Build and Test Stax SDK
+name: build
 
 on:
   push:

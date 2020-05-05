@@ -10,7 +10,7 @@ from botocore import UNSIGNED
 from botocore.client import Config as BotoConfig
 from warrant import AWSSRP, Cognito
 
-from stax.config import Config as JumaConfig
+from staxapp.config import Config as JumaConfig
 
 
 class StaxAuth:

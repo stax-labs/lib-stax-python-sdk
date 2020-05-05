@@ -7,8 +7,8 @@ nose2 -v basics
 
 import unittest
 
-from stax.contract import StaxContract
-from stax.exceptions import ValidationException
+from staxapp.contract import StaxContract
+from staxapp.exceptions import ValidationException
 
 
 class StaxContractTests(unittest.TestCase):
