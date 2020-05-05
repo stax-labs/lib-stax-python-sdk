@@ -28,7 +28,6 @@ class StaxClientTests(unittest.TestCase):
         self.assertTrue(self.account_client._initialized)
         self.assertTrue(self.workload_client._initialized)
 
-
     def testStaxClient(self):
         """
         Test initializing Stax client
@@ -74,7 +73,7 @@ class StaxClientTests(unittest.TestCase):
         response = self.account_client.ReadAccounts(**params)
         self.assertEqual(response, response_dict)
 
-                # Test a valid GET with params
+        # Test a valid GET with params
         response_dict = {"Status": "OK"}
         responses.add(
             responses.GET,
@@ -97,7 +96,6 @@ class StaxClientTests(unittest.TestCase):
         response = self.account_client.CreateAccount(Name="Unit", AccountType="Test")
         self.assertEqual(response, response_dict)
 
-    
     @responses.activate
     def testStaxWrapperErrors(self):
         """
@@ -114,13 +112,18 @@ class StaxClientTests(unittest.TestCase):
         )
         # Test an error occurs when the wrong client is used
         with self.assertRaises(ValidationException):
-            self.account_client.ReadCatalogueVersion(catalogue_id='fake-id', version_id='fake-id')
+            self.account_client.ReadCatalogueVersion(
+                catalogue_id="fake-id", version_id="fake-id"
+            )
         # Test an error occurs when a parameter is missing
         with self.assertRaises(ValidationException):
-            self.workload_client.ReadCatalogueVersion(version_id='fake-id/fake-id')
+            self.workload_client.ReadCatalogueVersion(version_id="fake-id/fake-id")
         # Test an error occurs when error in response
         with self.assertRaises(ApiException):
-            self.workload_client.ReadCatalogueVersion(catalogue_id='fake-id', version_id='fake-id')
+            self.workload_client.ReadCatalogueVersion(
+                catalogue_id="fake-id", version_id="fake-id"
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

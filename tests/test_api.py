@@ -94,7 +94,7 @@ class StaxApiTests(unittest.TestCase):
         Test failed POST route
         """
         # Test HTTP exception
-        response_dict={"Error": "Unit Test server error for post"}
+        response_dict = {"Error": "Unit Test server error for post"}
         responses.add(
             responses.POST,
             f"{Config.api_base_url()}/test/post/exception",
@@ -140,7 +140,7 @@ class StaxApiTests(unittest.TestCase):
         Test failed PUT route
         """
         # Test HTTP exception
-        response_dict = {"Error" : "Unit test server error for put"}
+        response_dict = {"Error": "Unit test server error for put"}
         responses.add(
             responses.PUT,
             f"{Config.api_base_url()}/test/put/exception",

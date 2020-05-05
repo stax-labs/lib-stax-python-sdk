@@ -17,6 +17,7 @@ class StaxConfigTests(unittest.TestCase):
     """
     Inherited class to run all unit tests for this module
     """
+
     def setUp(self):
         self.Config = Config
         self.Config.init()
@@ -34,7 +35,6 @@ class StaxConfigTests(unittest.TestCase):
         self.Config._initialized = False
         with self.assertRaises(ApiException):
             self.Config.init()
-       
 
     def testConfig(self):
         """
@@ -42,7 +42,7 @@ class StaxConfigTests(unittest.TestCase):
         """
         self.assertEqual(self.Config.STAX_REGION, "au1.staxapp.cloud")
         self.assertEqual(self.Config.API_VERSION, "20190206")
-    
+
     def testBaseUrl(self):
         """
         Test base url is returned
@@ -61,8 +61,7 @@ class StaxConfigTests(unittest.TestCase):
         Test schema url is returned
         """
         self.assertEqual(
-            self.Config.schema_url(),
-            f"{Config.api_base_url()}/public/api-document",
+            self.Config.schema_url(), f"{Config.api_base_url()}/public/api-document",
         )
 
     def testAuth(self):

@@ -16,7 +16,7 @@ help:
 	@echo "make lint"
 	@echo "       run black"
 
-test:
+test: lint
 	PYTHONPATH=$(CURRENT_DIRECTORY)/src ${PYTHON} -m pytest --cov=. --cov-config=.coveragerc --cov-report term-missing tests/ --junitxml=coverage-reports/test-report.xml --cov-report xml:coverage-reports/coverage-report.xml
 
 install:
@@ -24,15 +24,15 @@ install:
 	${PIP} install -r requirements.txt
 
 lint: install
-	${ISORT} --diff stax/*.py
-	${BLACK} -t py37 --diff stax/
+	${ISORT} --diff staxapp/*.py
+	${BLACK} -t py37 --diff staxapp/
 
 format: lint
-	${ISORT} --apply stax/*.py
-	${BLACK} -t py37 stax/
+	${ISORT} --apply staxapp/*.py
+	${BLACK} -t py37 staxapp/
 
 download-schema:
-	curl --fail --compressed -s -o stax/data/schema.json https://api.au1.staxapp.cloud/20190206/public/api-document
+	curl --fail --compressed -s -o staxapp/data/schema.json https://api.au1.staxapp.cloud/20190206/public/api-document
 
 bundle-test: install
 	${PIP} install twine

@@ -10,6 +10,7 @@ logging.getLogger("botocore").setLevel(logging.WARNING)
 logging.getLogger("nose").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 
+
 class Config:
     """
     Insert doco here
@@ -33,15 +34,17 @@ class Config:
     @classmethod
     def set_config(cls):
         cls.base_url = f"https://api.{cls.STAX_REGION}/{cls.API_VERSION}"
-        config_url = f'{cls.api_base_url()}/public/config'
+        config_url = f"{cls.api_base_url()}/public/config"
         config_response = requests.get(config_url)
         # logging.debug(f"IDAM: get config from {config_url}")
         try:
             config_response.raise_for_status()
         except requests.exceptions.HTTPError as e:
             logging.error(f"{config_response.status_code}: {config_response.json()}")
-            raise ApiException(str(e), config_response, detail='Could not load API config.')
-        
+            raise ApiException(
+                str(e), config_response, detail="Could not load API config."
+            )
+
         cls.api_config = config_response.json()
 
     @classmethod
@@ -64,7 +67,7 @@ class Config:
 
     @classmethod
     def schema_url(cls):
-         return f"{cls.base_url}/public/api-document"
+        return f"{cls.base_url}/public/api-document"
 
     @classmethod
     def auth(cls):
@@ -74,5 +77,6 @@ class Config:
 
             cls.auth_class = ApiTokenAuth
         return cls.auth_class
+
 
 Config.init()
