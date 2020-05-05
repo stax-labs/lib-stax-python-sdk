@@ -4,8 +4,8 @@ import os
 import requests
 from contextlib import suppress
 
-from stax.config import Config
-from stax.exceptions import ValidationException
+from staxapp.exceptions import ValidationException
+from staxapp.config import Config
 
 from jsonschema import validate as json_validate
 from prance import ResolvingParser

@@ -7,11 +7,12 @@ import requests
 from jsonschema import validate
 from prance import ResolvingParser
 
-from stax.api import Api
-from stax.auth import ApiTokenAuth
-from stax.config import Config
-from stax.contract import StaxContract
-from stax.exceptions import ValidationException
+
+from staxapp.api import Api
+from staxapp.auth import ApiTokenAuth
+from staxapp.config import ApiException, Config
+from staxapp.contract import StaxContract
+from staxapp.exceptions import ValidationException
 
 
 class StaxClient:

@@ -1,62 +1,45 @@
-## Install
+# Stax SDK for Python
+`staxapp` is the [Stax](https://stax.io) Software Development Kit (SDK) for Python, allowing users to interact with the Stax platform.
+
+![Build](https://github.com/stax-labs/lib-stax-python-sdk/workflows/Build/badge.svg)
+
+## Authentication
+In order to use the Stax SDK for Python, you will need a valid [Stax API Token](https://www.stax.io/docs/stax_team/access_stax_api_with_an_api_token/).
+
+## Installation
+Install the package using `pip`:
 ```bash
-pip install stax
+pip install staxapp
 ```
-
-## Configuration
+Configure environment variables:
 
 ```bash
-export AWS_DEFAULT_REGION=ap-southeast-2
 export STAX_REGION=au1.staxapp.cloud
+export STAX_ACCESS_KEY=<your_access_key>
+export STAX_SECRET_KEY=<your_secret_key>
 ```
 
-## Examples
+## Code Examples
 
-### Create or update a Workload Catalogue
+### Read Accounts
+The following code can be used to read accounts within your Stax Organisation:
 ```python
-from stax.config import Config
-from stax.openapi import StaxClient
+import os
 
-Config.access_key = 'walter@lebowski.org'
-Config.secret_key = '<very secret>'
+from staxapp.config import Config
+from staxapp.openapi import StaxClient
 
-manifest_body = ""
-with open('IDAM-workload.out.yml', 'r') as manifest:
-    manifest_body = manifest.read()
+Config.access_key = os.getenv("STAX_ACCESS_KEY")
+Config.secret_key = os.getenv("STAX_SECRET_KEY")
 
-payload = {
-}
-client = StaxClient("workloads")
-client.CreateCatalogueItem(
-    Name="stax-example",
-    ManifestBody=manifest_body,
-    Version="4.8.3",
-    Description="stax-example workload",
-)
-```
-
-### Get an AWS Account Id
-```python
-from stax.config import Config
-from stax.openapi import StaxClient
-
-Config.access_key = 'donny@lebowski.org'
-Config.secret_key = '<very secret>'
-
+# Read all accounts within your Stax Organisation
 accounts = StaxClient("accounts")
-account = [account for account in accounts.ReadAccounts()["Accounts"] if account["Name"] == "logging"][0]
-print(account["AwsAccountId"])
-```
+response = accounts.ReadAccounts()
+print(response)
 
-### Arbitrary API request
-```python
-from stax.config import Config
-from stax.openapi import StaxClient
-
-Config.access_key = 'thebig@lebowski.org'
-Config.secret_key = '<very secret>'
-
-client = StaxClient("accounts")
-response = client.ReadAccounts()
+# Read all active accounts within your Stax Organisation and include tags in the response
+accounts = StaxClient("accounts")
+response = accounts.ReadAccounts(filter="ACTIVE", include_tags=True)
 print(response)
 ```
+

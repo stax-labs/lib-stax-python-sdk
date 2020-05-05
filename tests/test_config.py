@@ -5,14 +5,13 @@ To run:
 nose2 -v basics
 """
 
-import os
 import unittest
 import responses
-import requests
 
-from stax.auth import ApiTokenAuth
-from stax.config import Config
-from stax.exceptions import ApiException
+from staxapp.auth import ApiTokenAuth
+from staxapp.config import Config
+from staxapp.exceptions import ApiException
+
 
 class StaxConfigTests(unittest.TestCase):
     """

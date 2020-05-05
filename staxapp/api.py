@@ -3,8 +3,8 @@ import logging
 
 import requests
 
-from stax.config import Config
-from stax.exceptions import ApiException
+from staxapp.exceptions import ApiException
+from staxapp.config import Config
 
 
 class Api:

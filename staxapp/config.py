@@ -2,7 +2,7 @@ import logging
 import os
 
 import requests
-from stax.exceptions import ApiException
+from staxapp.exceptions import ApiException
 
 logging.getLogger().setLevel(logging.DEBUG)
 logging.getLogger("boto3").setLevel(logging.WARNING)
@@ -70,7 +70,7 @@ class Config:
     def auth(cls):
         # logging.debug(f"AUTHCLASS: {cls.auth_class}")
         if cls.auth_class is None:
-            from stax.auth import ApiTokenAuth
+            from staxapp.auth import ApiTokenAuth
 
             cls.auth_class = ApiTokenAuth
         return cls.auth_class

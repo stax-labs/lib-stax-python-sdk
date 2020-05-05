@@ -8,10 +8,10 @@ nose2 -v basics
 import responses
 import unittest
 
-from stax.api import Api
-from stax.config import Config
-from stax.openapi import StaxClient
-from stax.exceptions import ApiException, ValidationException
+from staxapp.api import Api
+from staxapp.config import Config
+from staxapp.openapi import StaxClient
+from staxapp.exceptions import ApiException, ValidationException
 
 
 class StaxClientTests(unittest.TestCase):

@@ -14,7 +14,7 @@ from botocore import UNSIGNED
 from botocore.client import Config as BotoConfig
 from botocore.stub import Stubber
 
-from stax.auth import StaxAuth
+from staxapp.auth import StaxAuth
 
 
 class StaxAuthTests(unittest.TestCase):

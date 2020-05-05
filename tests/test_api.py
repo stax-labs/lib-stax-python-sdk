@@ -7,11 +7,10 @@ nose2 -v basics
 
 import unittest
 import responses
-import requests
 
-from stax.config import Config
-from stax.api import Api
-from stax.exceptions import ApiException
+from staxapp.exceptions import ApiException
+from staxapp.config import Config
+from staxapp.api import Api
 
 
 class StaxApiTests(unittest.TestCase):
