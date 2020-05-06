@@ -19,7 +19,7 @@ export STAX_ACCESS_KEY=<your_access_key>
 export STAX_SECRET_KEY=<your_secret_key>
 ```
 
-## Code Examples
+## Usage
 
 ### Read Accounts
 The following code can be used to read accounts within your Stax Organisation:
@@ -43,3 +43,11 @@ response = accounts.ReadAccounts(filter="ACTIVE", include_tags=True)
 print(response)
 ```
 
+## Contributing
+For more information on contributing the to the Stax SDK, please see our [guide](CONTRIBUTING.md).
+
+## Getting Help
+* If you're having trouble using the Stax SDK, please refer to our [documentation](https://www.stax.io/docs/).<br>
+* If you've encountered an issue or found a bug, please [open an issue](https://github.com/stax-labs/lib-stax-python-sdk/issues).<br>
+* For any other requests, please contact [Stax support](mailto:support@stax.io).
+ 
