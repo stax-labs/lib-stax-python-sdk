@@ -2,10 +2,12 @@ name: deploy
 
 on:
   push:
-    branches: [ master ]
+    tags:
+      - '*'
 
 jobs:
   deploy:
+    if: github.ref == 'refs/heads/master'
     name: Package and publish to PyPi 📦
     runs-on: ubuntu-latest
     steps:
@@ -23,13 +25,13 @@ jobs:
         run: |
           pipenv run python setup.py sdist bdist_wheel
       - name: Publish distribution 📦 to Test PyPI
-        if: contains(github.ref, 'test')
+        if: contains(github.ref, 'refs/tags/*-beta')
         uses: pypa/gh-action-pypi-publish@master
         with:
           password: ${{ secrets.TEST_PYPI_PASSWORD }}
           repository_url: https://test.pypi.org/legacy/
   #    - name: Publish distribution 📦 to PyPI
-  #        if: contains(github.ref, 'release')
+  #        if: !(contains(github.ref, 'refs/tags/*-beta'))
   #        uses: pypa/gh-action-pypi-publish@master
   #        with:
   #          password: ${{ secrets.PYPI_PASSWORD }}
