@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy:
-    if: github.ref == 'refs/heads/master'
+    if: github.base_ref == 'refs/heads/master'
     name: Package and publish to PyPi 📦
     runs-on: ubuntu-latest
     steps:
@@ -31,7 +31,7 @@ jobs:
           password: ${{ secrets.TEST_PYPI_PASSWORD }}
           repository_url: https://test.pypi.org/legacy/
   #    - name: Publish distribution 📦 to PyPI
-  #        if: !(contains(github.ref, 'refs/tags/*-beta'))
+  #        if: (contains(github.ref, 'refs/tags/*-beta')) != true
   #        uses: pypa/gh-action-pypi-publish@master
   #        with:
   #          password: ${{ secrets.PYPI_PASSWORD }}
