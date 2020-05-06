@@ -26,3 +26,14 @@ class ValidationException(Exception):
     def __init__(self, message):
         # logging.info(f"VALIDATE: {message}")
         self.message = message
+
+
+class InvalidCredentialsException(Exception):
+    def __init__(self, message, detail=""):
+        prefix = f"InvalidCredentialsException: "
+        if detail:
+            prefix = f"{prefix}{detail} - "
+        self.message = f"{prefix}{message}"
+
+    def __str__(self):
+        return self.message

@@ -11,6 +11,7 @@ from botocore.client import Config as BotoConfig
 from warrant import AWSSRP, Cognito
 
 from staxapp.config import Config as JumaConfig
+from staxapp.exceptions import InvalidCredentialsException
 
 
 class StaxAuth:
@@ -23,6 +24,11 @@ class StaxAuth:
         self.aws_region = config.get(config_branch).get("region")
 
     def requests_auth(self, username, password):
+        if username is None:
+            raise InvalidCredentialsException("Please provide an Access Key to your config")
+        if password is None:
+            raise InvalidCredentialsException("Please provide a Secret Key to your config")
+
         id_token = self.id_token_from_cognito(username, password)
         id_creds = self.sts_from_cognito_identity_pool(id_token)
         auth = self.sigv4_signed_auth_headers(id_creds)
@@ -47,7 +53,14 @@ class StaxAuth:
                 client_id=self.client_id,
                 client=client,
             )
-            tokens = aws.authenticate_user()
+            try:
+                tokens = aws.authenticate_user()
+            except client.exceptions.NotAuthorizedException as e:
+                logging.error(e)
+                raise InvalidCredentialsException(message=str(e), detail="Please check your Secret Key is correct")
+            except client.exceptions.UserNotFoundException as e:
+                raise InvalidCredentialsException(message=str(e), detail="Please check your Access Key, that you have created your Api Token and that you are using the right STAX REGION")
+
             # logging.debug(f"TOKEN: {tokens}")
             token = tokens["AuthenticationResult"]["IdToken"]
         else:

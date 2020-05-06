@@ -15,7 +15,7 @@ from botocore.client import Config as BotoConfig
 from botocore.stub import Stubber
 
 from staxapp.auth import StaxAuth
-
+from staxapp.exceptions import InvalidCredentialsException
 
 class StaxAuthTests(unittest.TestCase):
     """
@@ -62,6 +62,20 @@ class StaxAuthTests(unittest.TestCase):
         )
         self.assertIn("Credentials", creds)
         self.assertTrue(creds.get("IdentityId").startswith("ap-southeast-2"))
+
+    def testCredentialErrors(self):
+      """
+      Test that errors are thrown when keys are invalid
+      """
+      sa = StaxAuth("ApiAuth")
+      # Test with no username
+      with self.assertRaises(InvalidCredentialsException):
+        sa.requests_auth(username=None, password='valid')
+      # Test with no username
+      with self.assertRaises(InvalidCredentialsException):
+        sa.requests_auth(username='valid', password=None)
+      # Test with invalid username password
+      # Todo
 
     def stub_cognito_creds(self, token: str):
         sa = StaxAuth("ApiAuth")
