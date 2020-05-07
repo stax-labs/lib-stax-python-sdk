@@ -1,14 +1,14 @@
 import json
 import logging
 import os
-import requests
 from contextlib import suppress
 
-from staxapp.exceptions import ValidationException
-from staxapp.config import Config
-
+import requests
 from jsonschema import validate as json_validate
 from prance import ResolvingParser
+
+from staxapp.config import Config
+from staxapp.exceptions import ValidationException
 
 logging.getLogger("openapi_spec_validator.validators").setLevel(logging.WARNING)
 

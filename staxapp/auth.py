@@ -1,10 +1,10 @@
 #!/usr/local/bin/python3
 import logging
-import jwt
 import sys
 from datetime import date, datetime, timedelta, timezone
 
 import boto3
+import jwt
 from aws_requests_auth.aws_auth import AWSRequestsAuth
 from botocore import UNSIGNED
 from botocore.client import Config as BotoConfig
