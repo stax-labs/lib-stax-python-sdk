@@ -7,7 +7,6 @@ import requests
 from jsonschema import validate
 from prance import ResolvingParser
 
-
 from staxapp.api import Api
 from staxapp.auth import ApiTokenAuth
 from staxapp.config import ApiException, Config
@@ -82,15 +81,14 @@ class StaxClient:
 
                 if not cls._operation_map.get(api_class):
                     cls._operation_map[api_class] = dict()
-                cls._operation_map[api_class][method_name] = dict()
-                cls._operation_map[api_class][method_name]["path"] = base_path
-                cls._operation_map[api_class][method_name]["method"] = method_type
-                if len(parameters) > len(
-                    cls._operation_map[api_class][method_name].get("parameters", [])
-                ):
-                    cls._operation_map[api_class][method_name][
-                        "parameters"
-                    ] = parameters
+                if not cls._operation_map.get(api_class, {}).get(method_name):
+                    cls._operation_map[api_class][method_name] = dict()
+                    cls._operation_map[api_class][method_name]["path"] = base_path
+                    cls._operation_map[api_class][method_name]["method"] = method_type
+                    cls._operation_map[api_class][method_name]["parameters"] = []
+                cls._operation_map[api_class][method_name]["parameters"].append(
+                    parameters
+                )
 
     def __getattr__(self, name):
         self.name = name
@@ -104,18 +102,25 @@ class StaxClient:
                 )
             payload = {**kwargs}
             parameters = ""
-            preceding_parameter = False
             # All parameters starting with the most dependant
-            all_schema_parameters = self._operation_map[self.classname][self.name].get(
+            operation_parameters = self._operation_map[self.classname][self.name].get(
                 "parameters", []
             )
-            # Get any parameters from the keyword args and remove them from the payload
-            for parameter in all_schema_parameters[::-1]:
-                if parameter in payload:
-                    parameters = f"/{payload.pop(parameter, None)}{parameters}"
-                    preceding_parameter = True
-                elif preceding_parameter:
-                    raise ValidationException(f"Missing parameter: {parameter}")
+            # Sort the operation map parameters
+            sorted_operation_parameters = sorted(
+                operation_parameters, key=len, reverse=True
+            )
+
+            # Check if the any of the parameter schemas match parameters provided
+            for parameter_list in sorted_operation_parameters:
+                # Get any parameters from the keyword args and remove them from the payload
+                if set(parameter_list).issubset(payload.keys()):
+                    for parameter in parameter_list:
+                        parameters = f"{parameters}/{payload.pop(parameter, None)}"
+            if parameters.count("/") < len(sorted_operation_parameters[-1]):
+                raise ValidationException(
+                    f"Missing one or more parameters: {sorted_operation_parameters[-1]}"
+                )
 
             if method["method"].lower() in ["put", "post"]:
                 # We only validate the payload for POST/PUT routes

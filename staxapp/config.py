@@ -2,6 +2,7 @@ import logging
 import os
 
 import requests
+
 from staxapp.exceptions import ApiException
 
 logging.getLogger().setLevel(logging.DEBUG)
