@@ -25,7 +25,7 @@ install:
 
 lint: install
 	${ISORT} --diff staxapp/*.py
-	${BLACK} -t py37 --diff staxapp/
+	${BLACK} -t py37 --check --diff staxapp/
 
 format: lint
 	${ISORT} --apply staxapp/*.py
