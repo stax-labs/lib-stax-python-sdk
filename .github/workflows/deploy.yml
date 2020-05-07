@@ -1,9 +1,8 @@
 name: deploy
 
 on:
-  push:
-    tags:
-      - 'v*'
+  release:
+    types: [published]
 
 jobs:
   deploy:
@@ -24,13 +23,13 @@ jobs:
         run: |
           pipenv run python setup.py sdist bdist_wheel
       - name: Publish distribution 📦 to Test PyPI
-        if: contains(github.ref, 'beta')
+        if: github.event.release.prerelease == true
         uses: pypa/gh-action-pypi-publish@master
         with:
           password: ${{ secrets.TEST_PYPI_PASSWORD }}
           repository_url: https://test.pypi.org/legacy/
       - name: Publish distribution 📦 to PyPI
-        if: contains(github.ref, 'beta') != true
+        if: github.event.release.prerelease != true
         uses: pypa/gh-action-pypi-publish@master
         with:
           password: ${{ secrets.PYPI_PASSWORD }}
