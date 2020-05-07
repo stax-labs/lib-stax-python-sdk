@@ -29,8 +29,8 @@ jobs:
         with:
           password: ${{ secrets.TEST_PYPI_PASSWORD }}
           repository_url: https://test.pypi.org/legacy/
-  #    - name: Publish distribution 📦 to PyPI
-  #        if: (contains(github.ref, 'beta')) != true
-  #        uses: pypa/gh-action-pypi-publish@master
-  #        with:
-  #          password: ${{ secrets.PYPI_PASSWORD }}
+      - name: Publish distribution 📦 to PyPI
+          if: (contains(github.ref, 'beta')) != true
+          uses: pypa/gh-action-pypi-publish@master
+          with:
+            password: ${{ secrets.PYPI_PASSWORD }}

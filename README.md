@@ -44,7 +44,7 @@ print(response)
 ```
 
 ## Contributing
-For more information on contributing the to the Stax SDK, please see our [guide](CONTRIBUTING.md).
+For more information on contributing the to the Stax SDK, please see our [guide](https://github.com/stax-labs/lib-stax-python-sdk/blob/master/CONTRIBUTING.md).
 
 ## Getting Help
 * If you're having trouble using the Stax SDK, please refer to our [documentation](https://www.stax.io/docs/).<br>
