@@ -209,8 +209,8 @@ class StaxApiTests(unittest.TestCase):
         )
         with self.assertRaises(ApiException):
             self.Api.get("/test/no/error")
-        
-		# Test an exception which has no json in response
+
+        # Test an exception which has no json in response
         responses.add(
             responses.GET,
             f"{Config.api_base_url()}/test/invalid/json",
@@ -219,16 +219,14 @@ class StaxApiTests(unittest.TestCase):
         )
         with self.assertRaises(ApiException):
             self.Api.get("/test/invalid/json")
-		
+
         # Test an exception with no content
         responses.add(
-            responses.GET,
-            f"{Config.api_base_url()}/test/no/content",
-            status=500,
+            responses.GET, f"{Config.api_base_url()}/test/no/content", status=500,
         )
         with self.assertRaises(ApiException):
             self.Api.get("/test/no/content")
-        
+
 
 if __name__ == "__main__":
     unittest.main()

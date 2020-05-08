@@ -8,6 +8,7 @@ import jwt
 from aws_requests_auth.aws_auth import AWSRequestsAuth
 from botocore import UNSIGNED
 from botocore.client import Config as BotoConfig
+from botocore.exceptions import ClientError
 from warrant import AWSSRP, Cognito
 
 from staxapp.config import Config as JumaConfig
@@ -25,9 +26,13 @@ class StaxAuth:
 
     def requests_auth(self, username, password):
         if username is None:
-            raise InvalidCredentialsException("Please provide an Access Key to your config")
+            raise InvalidCredentialsException(
+                "Please provide an Access Key to your config"
+            )
         if password is None:
-            raise InvalidCredentialsException("Please provide a Secret Key to your config")
+            raise InvalidCredentialsException(
+                "Please provide a Secret Key to your config"
+            )
 
         id_token = self.id_token_from_cognito(username, password)
         id_creds = self.sts_from_cognito_identity_pool(id_token)
@@ -38,14 +43,15 @@ class StaxAuth:
 
         return JumaConfig.auth
 
-    def id_token_from_cognito(self, username=None, password=None):
+    def id_token_from_cognito(self, username=None, password=None, client=None):
         token = None
         if username and password:
-            client = boto3.client(
-                "cognito-idp",
-                region_name=self.aws_region,
-                config=BotoConfig(signature_version=UNSIGNED),
-            )
+            if not client:
+                client = boto3.client(
+                    "cognito-idp",
+                    region_name=self.aws_region,
+                    config=BotoConfig(signature_version=UNSIGNED),
+                )
             aws = AWSSRP(
                 username=username,
                 password=password,
@@ -55,16 +61,21 @@ class StaxAuth:
             )
             try:
                 tokens = aws.authenticate_user()
-            except client.exceptions.NotAuthorizedException as e:
-                logging.error(e)
-                raise InvalidCredentialsException(message=str(e), detail="Please check your Secret Key is correct")
-            except client.exceptions.UserNotFoundException as e:
-                raise InvalidCredentialsException(message=str(e), detail="Please check your Access Key, that you have created your Api Token and that you are using the right STAX REGION")
-
-            # logging.debug(f"TOKEN: {tokens}")
+            except ClientError as e:
+                if e.response["Error"]["Code"] == "UserNotFoundException":
+                    raise InvalidCredentialsException(
+                        message=str(e), detail="Please check your Secret Key is correct"
+                    )
+                elif e.response["Error"]["Code"] == "NotAuthorizedException":
+                    raise InvalidCredentialsException(
+                        message=str(e),
+                        detail="Please check your Access Key, that you have created your Api Token and that you are using the right STAX REGION",
+                    )
+                else:
+                    raise InvalidCredentialsException(
+                        f"Unexpected Client Error. Error details: {e}"
+                    )
             token = tokens["AuthenticationResult"]["IdToken"]
-        else:
-            token = jwt.encode({"sub": "unittest"}, "secret", algorithm="HS256")
         return token
 
     def sts_from_cognito_identity_pool(self, token, cognito_client=None):

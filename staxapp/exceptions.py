@@ -30,6 +30,7 @@ class ValidationException(Exception):
 
 class InvalidCredentialsException(Exception):
     def __init__(self, message, detail=""):
+        logging.error(message)
         prefix = f"InvalidCredentialsException: "
         if detail:
             prefix = f"{prefix}{detail} - "
