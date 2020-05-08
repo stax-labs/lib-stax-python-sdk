@@ -67,7 +67,7 @@ class StaxAuthTests(unittest.TestCase):
 
         sa = StaxAuth("ApiAuth")
         # Test with invalid username password
-        self.stub_aws_srp(sa, "bad_password", "UserNotFoundException")
+        self.stub_aws_srp(sa, "bad_password", "NotAuthorizedException")
         user_not_found_success = False
         try:
             sa.id_token_from_cognito(
@@ -79,7 +79,7 @@ class StaxAuthTests(unittest.TestCase):
         self.assertTrue(user_not_found_success)
 
         # Test with no access
-        self.stub_aws_srp(sa, "no_access", "NotAuthorizedException")
+        self.stub_aws_srp(sa, "no_access", "UserNotFoundException")
         no_access_success = False
         try:
             sa.id_token_from_cognito(

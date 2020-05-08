@@ -62,11 +62,11 @@ class StaxAuth:
             try:
                 tokens = aws.authenticate_user()
             except ClientError as e:
-                if e.response["Error"]["Code"] == "UserNotFoundException":
+                if e.response["Error"]["Code"] == "NotAuthorizedException":
                     raise InvalidCredentialsException(
                         message=str(e), detail="Please check your Secret Key is correct"
                     )
-                elif e.response["Error"]["Code"] == "NotAuthorizedException":
+                elif e.response["Error"]["Code"] == "UserNotFoundException":
                     raise InvalidCredentialsException(
                         message=str(e),
                         detail="Please check your Access Key, that you have created your Api Token and that you are using the right STAX REGION",
