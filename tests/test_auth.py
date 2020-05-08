@@ -12,9 +12,10 @@ import botocore
 
 from botocore import UNSIGNED
 from botocore.client import Config as BotoConfig
-from botocore.stub import Stubber
+from botocore.stub import Stubber, ANY
 
 from staxapp.auth import StaxAuth
+from staxapp.exceptions import InvalidCredentialsException
 
 
 class StaxAuthTests(unittest.TestCase):
@@ -30,8 +31,16 @@ class StaxAuthTests(unittest.TestCase):
         )
         self.cognito_stub = Stubber(self.cognito_client)
 
+        self.aws_srp_client = botocore.session.get_session().create_client(
+            "cognito-idp",
+            region_name="ap-southeast-2",
+            config=BotoConfig(signature_version=UNSIGNED),
+        )
+        self.aws_srp_stubber = Stubber(self.aws_srp_client)
+
     def tearDown(self):
         self.cognito_stub.deactivate()
+        self.aws_srp_stubber.deactivate()
 
     def testStaxAuthInit(self):
         """
@@ -45,16 +54,58 @@ class StaxAuthTests(unittest.TestCase):
         Test valid JWT is returned
         """
         sa = StaxAuth("ApiAuth")
-        token = sa.id_token_from_cognito()
-        jwt_token = jwt.decode(token, verify=False)
-        self.assertIn("sub", jwt_token)
+        self.stub_aws_srp(sa, "valid_username")
+        token = sa.id_token_from_cognito(
+            username="valid_username", password="correct", client=self.aws_srp_client
+        )
+        self.assertEqual(token, "valid_token")
+
+    def testCredentialErrors(self):
+        """
+        Test that boto errors are caught and converted to InvalidCredentialExceptions
+      """
+
+        sa = StaxAuth("ApiAuth")
+        # Test with invalid username password
+        self.stub_aws_srp(sa, "bad_password", "UserNotFoundException")
+        user_not_found_success = False
+        try:
+            sa.id_token_from_cognito(
+                username="bad_password", password="wrong", client=self.aws_srp_client
+            )
+        except InvalidCredentialsException as e:
+            self.assertIn("Please check your Secret Key is correct", e.message)
+            user_not_found_success = True
+        self.assertTrue(user_not_found_success)
+
+        # Test with no access
+        self.stub_aws_srp(sa, "no_access", "NotAuthorizedException")
+        no_access_success = False
+        try:
+            sa.id_token_from_cognito(
+                username="no_access", password="wrong", client=self.aws_srp_client
+            )
+        except InvalidCredentialsException as e:
+            self.assertIn(
+                "Please check your Access Key, that you have created your Api Token and that you are using the right STAX REGION",
+                e.message,
+            )
+            no_access_success = True
+        self.assertTrue(no_access_success)
+
+        # Test Unknown Error
+        self.stub_aws_srp(sa, "Unknown", "UnitTesting")
+        with self.assertRaises(InvalidCredentialsException):
+            sa.id_token_from_cognito(
+                username="Unknown", password="wrong", client=self.aws_srp_client
+            )
 
     def testCreds(self):
         """
         Test valid credentials are returned
         """
         sa = StaxAuth("ApiAuth")
-        token = sa.id_token_from_cognito()
+        token = jwt.encode({"sub": "unittest"}, "secret", algorithm="HS256")
         jwt_token = jwt.decode(token, verify=False)
         self.stub_cognito_creds(jwt_token.get("sub"))
         creds = sa.sts_from_cognito_identity_pool(
@@ -62,6 +113,56 @@ class StaxAuthTests(unittest.TestCase):
         )
         self.assertIn("Credentials", creds)
         self.assertTrue(creds.get("IdentityId").startswith("ap-southeast-2"))
+
+    def testAuthErrors(self):
+        """
+      Test that errors are thrown when keys are invalid
+      """
+        sa = StaxAuth("ApiAuth")
+        # Test with no username
+        with self.assertRaises(InvalidCredentialsException):
+            sa.requests_auth(username=None, password="valid")
+
+        # Test with no username
+        with self.assertRaises(InvalidCredentialsException):
+            sa.requests_auth(username="valid", password=None)
+
+    def stub_aws_srp(self, stax_auth, username, error_code=None):
+        expected_parameters = {
+            "AuthFlow": "USER_SRP_AUTH",
+            "AuthParameters": {"SRP_A": ANY, "USERNAME": username},
+            "ClientId": stax_auth.client_id,
+        }
+        if error_code:
+            self.aws_srp_stubber.add_client_error(
+                "initiate_auth",
+                service_error_code=error_code,
+                expected_params=expected_parameters,
+            )
+        else:
+            self.aws_srp_stubber.add_response(
+                "initiate_auth",
+                {
+                    "ChallengeParameters": {
+                        "USER_ID_FOR_SRP": "user",
+                        "SALT": "4",
+                        "SRP_B": "5",
+                        "SECRET_BLOCK": "secblock",
+                    },
+                    "ChallengeName": "PASSWORD_VERIFIER",
+                },
+                expected_parameters,
+            )
+            self.aws_srp_stubber.add_response(
+                "respond_to_auth_challenge",
+                {"AuthenticationResult": {"IdToken": "valid_token"},},
+                {
+                    "ClientId": stax_auth.client_id,
+                    "ChallengeName": ANY,
+                    "ChallengeResponses": ANY,
+                },
+            )
+        self.aws_srp_stubber.activate()
 
     def stub_cognito_creds(self, token: str):
         sa = StaxAuth("ApiAuth")
