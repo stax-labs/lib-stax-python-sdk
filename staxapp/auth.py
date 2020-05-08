@@ -10,12 +10,12 @@ from botocore import UNSIGNED
 from botocore.client import Config as BotoConfig
 from warrant import AWSSRP, Cognito
 
-from staxapp.config import Config as JumaConfig
+from staxapp.config import Config as StaxConfig
 
 
 class StaxAuth:
     def __init__(self, config_branch):
-        config = JumaConfig.api_config
+        config = StaxConfig.api_config
 
         self.identity_pool = config.get(config_branch).get("identityPoolId")
         self.user_pool = config.get(config_branch).get("userPoolId")
@@ -27,10 +27,10 @@ class StaxAuth:
         id_creds = self.sts_from_cognito_identity_pool(id_token)
         auth = self.sigv4_signed_auth_headers(id_creds)
 
-        JumaConfig.expiration = id_creds.get("Credentials").get("Expiration")
-        JumaConfig.auth = auth
+        StaxConfig.expiration = id_creds.get("Credentials").get("Expiration")
+        StaxConfig.auth = auth
 
-        return JumaConfig.auth
+        return StaxConfig.auth
 
     def id_token_from_cognito(self, username=None, password=None):
         token = None
@@ -83,7 +83,7 @@ class StaxAuth:
             aws_access_key=id_creds.get("Credentials").get("AccessKeyId"),
             aws_secret_access_key=id_creds.get("Credentials").get("SecretKey"),
             aws_token=id_creds.get("Credentials").get("SessionToken"),
-            aws_host=f"{JumaConfig.hostname}",
+            aws_host=f"{StaxConfig.hostname}",
             aws_region=self.aws_region,
             aws_service="execute-api",
         )
@@ -94,16 +94,16 @@ class StaxAuth:
 class RootAuth:
     @staticmethod
     def requests_auth(username, password):
-        if JumaConfig.expiration and JumaConfig.expiration > datetime.now(timezone.utc):
-            return JumaConfig.auth
+        if StaxConfig.expiration and StaxConfig.expiration > datetime.now(timezone.utc):
+            return StaxConfig.auth
 
-        return StaxAuth("JumaAuth").requests_auth(username, password)
+        return StaxAuth("StaxAuth").requests_auth(username, password)
 
 
 class ApiTokenAuth:
     @staticmethod
     def requests_auth(username, password):
-        if JumaConfig.expiration and JumaConfig.expiration > datetime.now(timezone.utc):
-            return JumaConfig.auth
+        if StaxConfig.expiration and StaxConfig.expiration > datetime.now(timezone.utc):
+            return StaxConfig.auth
 
         return StaxAuth("ApiAuth").requests_auth(username, password)
