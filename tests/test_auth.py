@@ -9,12 +9,15 @@ import datetime
 import unittest
 import jwt
 import botocore
+import requests
+import responses
 
 from botocore import UNSIGNED
 from botocore.client import Config as BotoConfig
 from botocore.stub import Stubber, ANY
 
 from staxapp.auth import StaxAuth
+from staxapp.config import Config
 from staxapp.exceptions import InvalidCredentialsException
 
 
@@ -196,6 +199,35 @@ class StaxAuthTests(unittest.TestCase):
         )
 
         self.cognito_stub.activate()
+
+    @responses.activate
+    def testSigV4Headers(self):
+        """
+        Test sigv4 signed auth headers
+        """
+        # Get signed auth headers
+        sa = StaxAuth("ApiAuth")
+        id_creds = {
+            "Credentials": {
+                "AccessKeyId": "ASIAX000000000000000",
+                "SecretKey": "0000000000000000000000000000000000000000",
+                "SessionToken": "a-totally-valid-JWT",
+                "Expiration": datetime.datetime(2020, 1, 14, 11, 52, 26),
+            }
+        }
+        auth = sa.sigv4_signed_auth_headers(id_creds)
+
+        # Mock request
+        response_dict = {"Status": "OK"}
+        responses.add(
+            responses.GET,
+            f"{Config.api_base_url()}/auth",
+            json=response_dict,
+            status=200,
+        )
+        response = requests.get(f"{Config.api_base_url()}/auth", auth=auth)
+        self.assertEqual(response.json(), response_dict)
+        self.assertIn("Authorization", response.request.headers)
 
 
 if __name__ == "__main__":

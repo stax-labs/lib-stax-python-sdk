@@ -17,7 +17,7 @@ help:
 	@echo "       run black"
 
 test: lint
-	PYTHONPATH=$(CURRENT_DIRECTORY)/src ${PYTHON} -m pytest --cov=. --cov-config=.coveragerc --cov-report term-missing tests/ --junitxml=coverage-reports/test-report.xml --cov-report xml:coverage-reports/coverage-report.xml
+	PYTHONPATH=$(CURRENT_DIRECTORY) ${PYTHON} -m pytest --cov=. --cov-config=.coveragerc --cov-report term-missing tests/ --junitxml=coverage-reports/test-report.xml --cov-report xml:coverage-reports/coverage-report.xml
 
 install:
 	python3 -m venv ${VIRTUAL_ENV}
