@@ -16,6 +16,7 @@ from botocore.client import Config as BotoConfig
 from botocore.stub import Stubber, ANY
 from datetime import datetime, timedelta, timezone
 
+from staxapp.api import Api
 from staxapp.auth import StaxAuth, ApiTokenAuth, RootAuth
 from staxapp.config import Config
 from staxapp.exceptions import InvalidCredentialsException
@@ -310,6 +311,28 @@ class StaxAuthTests(unittest.TestCase):
             cognito_client=self.cognito_client,
         )
         self.assertIsNotNone(StaxConfig.auth)
+
+    def testApiAuth(self):
+        """
+        Test auth through the Api class
+        """
+        sa = StaxAuth("ApiAuth")
+        StaxConfig = Config
+        StaxConfig.expiration = None
+        StaxConfig.access_key = "username"
+        StaxConfig.secret_key = "password"
+
+        token = jwt.encode({"sub": "valid_token"}, "secret", algorithm="HS256")
+        jwt_token = jwt.decode(token, verify=False)
+
+        self.stub_cognito_creds(sa, jwt_token.get("sub"))
+        self.stub_aws_srp(sa, "username")
+
+        Api._requests_auth = None
+        Api._auth(
+            srp_client=self.aws_srp_client, cognito_client=self.cognito_client,
+        )
+        self.assertIsNotNone(Api._requests_auth)
 
 
 if __name__ == "__main__":

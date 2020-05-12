@@ -8,10 +8,10 @@ class Api:
     _requests_auth = None
 
     @classmethod
-    def _auth(cls):
+    def _auth(cls, **kwargs):
         if not cls._requests_auth:
             cls._requests_auth = Config.get_auth_class().requests_auth(
-                Config.access_key, Config.secret_key
+                Config.access_key, Config.secret_key, **kwargs
             )
         return cls._requests_auth
 
