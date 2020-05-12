@@ -68,8 +68,9 @@ class StaxConfigTests(unittest.TestCase):
         """
         Test auth class is returned
         """
-        self.Config.auth()
-        self.assertEqual(self.Config.auth_class, ApiTokenAuth)
+        StaxConfig = Config
+        StaxConfig.get_auth_class()
+        self.assertEqual(StaxConfig.auth_class, ApiTokenAuth)
 
 
 if __name__ == "__main__":

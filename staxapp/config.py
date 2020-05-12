@@ -37,7 +37,6 @@ class Config:
         cls.base_url = f"https://api.{cls.STAX_REGION}/{cls.API_VERSION}"
         config_url = f"{cls.api_base_url()}/public/config"
         config_response = requests.get(config_url)
-        # logging.debug(f"IDAM: get config from {config_url}")
         try:
             config_response.raise_for_status()
         except requests.exceptions.HTTPError as e:
@@ -71,8 +70,7 @@ class Config:
         return f"{cls.base_url}/public/api-document"
 
     @classmethod
-    def auth(cls):
-        # logging.debug(f"AUTHCLASS: {cls.auth_class}")
+    def get_auth_class(cls):
         if cls.auth_class is None:
             from staxapp.auth import ApiTokenAuth
 

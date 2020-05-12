@@ -38,7 +38,6 @@ class StaxContract:
         Validates a request body against an component in a openapi3.0 template
         """
         if not cls._swagger_doc:
-            # logging.info(f"SCHEMA: no swagger defined, loading default template")
             cls.set_schema(cls.default_swagger_template())
 
         components = cls._resolved_schema.get("components")

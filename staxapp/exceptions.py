@@ -24,7 +24,6 @@ class ApiException(Exception):
 
 class ValidationException(Exception):
     def __init__(self, message):
-        # logging.info(f"VALIDATE: {message}")
         self.message = message
 
 
