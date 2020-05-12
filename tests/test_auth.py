@@ -59,9 +59,19 @@ class StaxAuthTests(unittest.TestCase):
         sa = StaxAuth("ApiAuth")
         self.stub_aws_srp(sa, "valid_username")
         token = sa.id_token_from_cognito(
-            username="valid_username", password="correct", srp_client=self.aws_srp_client
+            username="valid_username",
+            password="correct",
+            srp_client=self.aws_srp_client,
         )
         self.assertEqual(token, "valid_token")
+
+    def testTokenClient(self):
+        """
+        Test the AWSSRP client is invoked and throws an error
+        """
+        sa = StaxAuth("ApiAuth")
+        with self.assertRaises(InvalidCredentialsException):
+            sa.id_token_from_cognito(username="username", password="password")
 
     def testCredentialErrors(self):
         """
@@ -73,7 +83,9 @@ class StaxAuthTests(unittest.TestCase):
         user_not_found_success = False
         try:
             sa.id_token_from_cognito(
-                username="bad_password", password="wrong", srp_client=self.aws_srp_client
+                username="bad_password",
+                password="wrong",
+                srp_client=self.aws_srp_client,
             )
         except InvalidCredentialsException as e:
             self.assertIn("Please check your Secret Key is correct", e.message)
@@ -115,6 +127,16 @@ class StaxAuthTests(unittest.TestCase):
         )
         self.assertIn("Credentials", creds)
         self.assertTrue(creds.get("IdentityId").startswith("ap-southeast-2"))
+
+    def testCredsClient(self):
+        """
+        Test the cognito client is invoked and throws an error
+        """
+        sa = StaxAuth("ApiAuth")
+        token = jwt.encode({"sub": "unittest"}, "secret", algorithm="HS256")
+        jwt_token = jwt.decode(token, verify=False)
+        with self.assertRaises(InvalidCredentialsException):
+            sa.sts_from_cognito_identity_pool(jwt_token.get("sub"))
 
     def testAuthErrors(self):
         """
