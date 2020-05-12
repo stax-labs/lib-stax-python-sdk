@@ -1,6 +1,3 @@
-import json
-import logging
-
 import requests
 
 from staxapp.config import Config
@@ -13,7 +10,7 @@ class Api:
     @classmethod
     def _auth(cls):
         if not cls._requests_auth:
-            cls._requests_auth = Config.auth().requests_auth(
+            cls._requests_auth = Config.get_auth_class().requests_auth(
                 Config.access_key, Config.secret_key
             )
         return cls._requests_auth
@@ -31,7 +28,6 @@ class Api:
         url = f"{Config.api_base_url()}/{url_frag.lstrip('/')}"
 
         response = requests.get(url, auth=cls._auth(), params=params, **kwargs)
-        # logging.debug(f"GET: {response.text}")
         cls.handle_api_response(response)
         return response.json()
 
@@ -39,8 +35,8 @@ class Api:
     def post(cls, url_frag, payload={}, **kwargs):
         url_frag = url_frag.replace(f"/{Config.API_VERSION}", "")
         url = f"{Config.api_base_url()}/{url_frag.lstrip('/')}"
+
         response = requests.post(url, json=payload, auth=cls._auth(), **kwargs)
-        # logging.debug(f"POST: {response.text}")
         cls.handle_api_response(response)
         return response.json()
 

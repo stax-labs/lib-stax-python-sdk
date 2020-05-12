@@ -5,7 +5,6 @@ To run:
 nose2 -v basics
 """
 
-import datetime
 import unittest
 import jwt
 import botocore
@@ -15,8 +14,9 @@ import responses
 from botocore import UNSIGNED
 from botocore.client import Config as BotoConfig
 from botocore.stub import Stubber, ANY
+from datetime import datetime, timedelta, timezone
 
-from staxapp.auth import StaxAuth
+from staxapp.auth import StaxAuth, ApiTokenAuth, RootAuth
 from staxapp.config import Config
 from staxapp.exceptions import InvalidCredentialsException
 
@@ -59,22 +59,21 @@ class StaxAuthTests(unittest.TestCase):
         sa = StaxAuth("ApiAuth")
         self.stub_aws_srp(sa, "valid_username")
         token = sa.id_token_from_cognito(
-            username="valid_username", password="correct", client=self.aws_srp_client
+            username="valid_username", password="correct", srp_client=self.aws_srp_client
         )
         self.assertEqual(token, "valid_token")
 
     def testCredentialErrors(self):
         """
         Test that boto errors are caught and converted to InvalidCredentialExceptions
-      """
-
+        """
         sa = StaxAuth("ApiAuth")
         # Test with invalid username password
         self.stub_aws_srp(sa, "bad_password", "NotAuthorizedException")
         user_not_found_success = False
         try:
             sa.id_token_from_cognito(
-                username="bad_password", password="wrong", client=self.aws_srp_client
+                username="bad_password", password="wrong", srp_client=self.aws_srp_client
             )
         except InvalidCredentialsException as e:
             self.assertIn("Please check your Secret Key is correct", e.message)
@@ -86,7 +85,7 @@ class StaxAuthTests(unittest.TestCase):
         no_access_success = False
         try:
             sa.id_token_from_cognito(
-                username="no_access", password="wrong", client=self.aws_srp_client
+                username="no_access", password="wrong", srp_client=self.aws_srp_client
             )
         except InvalidCredentialsException as e:
             self.assertIn(
@@ -100,7 +99,7 @@ class StaxAuthTests(unittest.TestCase):
         self.stub_aws_srp(sa, "Unknown", "UnitTesting")
         with self.assertRaises(InvalidCredentialsException):
             sa.id_token_from_cognito(
-                username="Unknown", password="wrong", client=self.aws_srp_client
+                username="Unknown", password="wrong", srp_client=self.aws_srp_client
             )
 
     def testCreds(self):
@@ -110,7 +109,7 @@ class StaxAuthTests(unittest.TestCase):
         sa = StaxAuth("ApiAuth")
         token = jwt.encode({"sub": "unittest"}, "secret", algorithm="HS256")
         jwt_token = jwt.decode(token, verify=False)
-        self.stub_cognito_creds(jwt_token.get("sub"))
+        self.stub_cognito_creds(sa, jwt_token.get("sub"))
         creds = sa.sts_from_cognito_identity_pool(
             jwt_token.get("sub"), self.cognito_client
         )
@@ -130,11 +129,11 @@ class StaxAuthTests(unittest.TestCase):
         with self.assertRaises(InvalidCredentialsException):
             sa.requests_auth(username="valid", password=None)
 
-    def stub_aws_srp(self, stax_auth, username, error_code=None):
+    def stub_aws_srp(self, sa, username, error_code=None):
         expected_parameters = {
             "AuthFlow": "USER_SRP_AUTH",
             "AuthParameters": {"SRP_A": ANY, "USERNAME": username},
-            "ClientId": stax_auth.client_id,
+            "ClientId": sa.client_id,
         }
         if error_code:
             self.aws_srp_stubber.add_client_error(
@@ -160,15 +159,14 @@ class StaxAuthTests(unittest.TestCase):
                 "respond_to_auth_challenge",
                 {"AuthenticationResult": {"IdToken": "valid_token"},},
                 {
-                    "ClientId": stax_auth.client_id,
+                    "ClientId": sa.client_id,
                     "ChallengeName": ANY,
                     "ChallengeResponses": ANY,
                 },
             )
         self.aws_srp_stubber.activate()
 
-    def stub_cognito_creds(self, token: str):
-        sa = StaxAuth("ApiAuth")
+    def stub_cognito_creds(self, sa, token: str):
 
         id_response = {"IdentityId": "ap-southeast-2"}
         id_params = {
@@ -185,7 +183,7 @@ class StaxAuthTests(unittest.TestCase):
                 "AccessKeyId": "ASIAX000000000000000",
                 "SecretKey": "0000000000000000000000000000000000000000",
                 "SessionToken": "a-totally-valid-JWT",
-                "Expiration": datetime.datetime(2020, 1, 14, 11, 52, 26),
+                "Expiration": datetime(2020, 1, 14, 11, 52, 26),
             },
         }
         id_creds_params = {
@@ -212,7 +210,7 @@ class StaxAuthTests(unittest.TestCase):
                 "AccessKeyId": "ASIAX000000000000000",
                 "SecretKey": "0000000000000000000000000000000000000000",
                 "SessionToken": "a-totally-valid-JWT",
-                "Expiration": datetime.datetime(2020, 1, 14, 11, 52, 26),
+                "Expiration": datetime(2020, 1, 14, 11, 52, 26),
             }
         }
         auth = sa.sigv4_signed_auth_headers(id_creds)
@@ -228,6 +226,68 @@ class StaxAuthTests(unittest.TestCase):
         response = requests.get(f"{Config.api_base_url()}/auth", auth=auth)
         self.assertEqual(response.json(), response_dict)
         self.assertIn("Authorization", response.request.headers)
+
+    def testApiTokenAuthNotExpired(self):
+        """
+        Test credentials have not expired
+        """
+        StaxConfig = Config
+        StaxConfig.expiration = datetime.now(timezone.utc) + timedelta(hours=8)
+        self.assertIsNotNone(StaxConfig.expiration)
+
+        ApiTokenAuth.requests_auth("username", "password")
+        self.assertIsNotNone(StaxConfig.auth)
+
+    def testApiTokenAuth(self):
+        """
+        Test generating new credentials
+        """
+        sa = StaxAuth("ApiAuth")
+        StaxConfig = Config
+        StaxConfig.expiration = None
+        token = jwt.encode({"sub": "valid_token"}, "secret", algorithm="HS256")
+        jwt_token = jwt.decode(token, verify=False)
+        self.stub_cognito_creds(sa, jwt_token.get("sub"))
+        self.stub_aws_srp(sa, "username")
+
+        ApiTokenAuth.requests_auth(
+            "username",
+            "password",
+            srp_client=self.aws_srp_client,
+            cognito_client=self.cognito_client,
+        )
+        self.assertIsNotNone(StaxConfig.auth)
+
+    def testRootAuthNotExpired(self):
+        """
+        Test credentials have not expired
+        """
+        StaxConfig = Config
+        StaxConfig.expiration = datetime.now(timezone.utc) + timedelta(hours=8)
+        self.assertIsNotNone(StaxConfig.expiration)
+
+        RootAuth.requests_auth("username", "password")
+        self.assertIsNotNone(StaxConfig.auth)
+
+    def testRootAuth(self):
+        """
+        Test generating new credentials
+        """
+        sa = StaxAuth("JumaAuth")
+        StaxConfig = Config
+        StaxConfig.expiration = None
+        token = jwt.encode({"sub": "valid_token"}, "secret", algorithm="HS256")
+        jwt_token = jwt.decode(token, verify=False)
+        self.stub_cognito_creds(sa, jwt_token.get("sub"))
+        self.stub_aws_srp(sa, "username")
+
+        RootAuth.requests_auth(
+            "username",
+            "password",
+            srp_client=self.aws_srp_client,
+            cognito_client=self.cognito_client,
+        )
+        self.assertIsNotNone(StaxConfig.auth)
 
 
 if __name__ == "__main__":

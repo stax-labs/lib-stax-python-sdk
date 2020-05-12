@@ -1,11 +1,7 @@
 import json
-import logging
 import os
-import uuid
 
 import requests
-from jsonschema import validate
-from prance import ResolvingParser
 
 from staxapp.api import Api
 from staxapp.auth import ApiTokenAuth
@@ -26,7 +22,6 @@ class StaxClient:
         if not self._initialized:
             self._map_paths_to_operations()
             StaxContract.set_schema(self._schema)
-            # logging.info(f"{self._operation_map}")
             if not self._operation_map.get(self.classname):
                 raise ValidationException(
                     f"No such class: {self.classname}. Please use one of {list(self._operation_map)}"
@@ -44,14 +39,12 @@ class StaxClient:
     @classmethod
     def _load_schema(cls):
         if Config.load_live_schema:
-            # logging.info(f"SCHEMA: loading from {Config.schema_url()}")
             schema_response = requests.get(Config.schema_url())
             schema_response.raise_for_status()
             cls._schema = schema_response.json()
         else:
             current_dir = os.path.abspath(os.path.dirname(__file__))
             schema_file = f"{current_dir}/data/schema.json"
-            # logging.info(f"SCHEMA: loading from {schema_file}")
             with open(schema_file, "r") as f:
                 cls._schema = json.load(f)
 
