@@ -54,7 +54,7 @@ class StaxContract:
     @staticmethod
     def default_swagger_template() -> dict:
         # Get the default swagger template from https://api.au1.staxapp.cloud/20190206/public/api-document
-        schema = requests.get(Config.schema_url()).json()
+        schema_response = requests.get(Config.schema_url()).json()
         template = dict(
             openapi="3.0.0",
             info={
@@ -75,7 +75,7 @@ class StaxContract:
                         "x-amazon-apigateway-authtype": "awsSigv4",
                     }
                 },
-                "schemas": schema,
+                "schemas": schema_response.get("components").get("schemas"),
                 "responses": dict(),
                 "requestBodies": dict(),
             },

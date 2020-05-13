@@ -89,7 +89,7 @@ class StaxAuthTests(unittest.TestCase):
                 srp_client=self.aws_srp_client,
             )
         except InvalidCredentialsException as e:
-            self.assertIn("Please check your Secret Key is correct", e.message)
+            self.assertIn("Please check your Secret Key is correct", str(e))
             user_not_found_success = True
         self.assertTrue(user_not_found_success)
 
@@ -103,7 +103,7 @@ class StaxAuthTests(unittest.TestCase):
         except InvalidCredentialsException as e:
             self.assertIn(
                 "Please check your Access Key, that you have created your Api Token and that you are using the right STAX REGION",
-                e.message,
+                str(e),
             )
             no_access_success = True
         self.assertTrue(no_access_success)

@@ -207,8 +207,10 @@ class StaxApiTests(unittest.TestCase):
             json=response_dict,
             status=500,
         )
-        with self.assertRaises(ApiException):
+        try:
             self.Api.get("/test/no/error")
+        except ApiException as e:
+            self.assertIn("Api Exception", str(e))
 
         # Test an exception which has no json in response
         responses.add(

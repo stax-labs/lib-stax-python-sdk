@@ -19,6 +19,17 @@ class StaxContractTests(unittest.TestCase):
     def setUp(self):
         self.StaxContract = StaxContract
 
+    def testInvalidSchema(self):
+        """
+        Test an error is thrown if no schema is found
+        """
+        sc = StaxContract
+        sc._swagger_doc = None
+        data = {"Name": "Unit", "AccountType": "Test"}
+        component = "accounts.CreateAccount"
+        sc.validate(data, component)
+        self.assertIsNotNone(sc._swagger_doc)
+
     def testDefaultSchema(self):
         """
         Test the default schema is valid
