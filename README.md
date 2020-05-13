@@ -4,7 +4,7 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=stax-labs_lib-stax-python-sdk&metric=alert_status&token=a1841dea3e7b4f749a99ea4351e95de1775f39fb)](https://sonarcloud.io/dashboard?id=stax-labs_lib-stax-python-sdk)
 ![build](https://github.com/stax-labs/lib-stax-python-sdk/workflows/build/badge.svg)
 ![deploy](https://github.com/stax-labs/lib-stax-python-sdk/workflows/deploy/badge.svg)
-
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/staxapp)
 ## Authentication
 In order to use the Stax SDK for Python, you will need a valid [Stax API Token](https://www.stax.io/docs/stax_team/access_stax_api_with_an_api_token/).
 
