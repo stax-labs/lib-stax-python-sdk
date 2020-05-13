@@ -36,6 +36,13 @@ class StaxClientTests(unittest.TestCase):
         self.assertTrue(client._initialized)
         self.assertTrue(client._admin)
 
+    def testInvalidStaxClient(self):
+        """
+        Test an invalid Api class raises an error
+        """
+        with self.assertRaises(ValidationException):
+            StaxClient("fake")
+
     def testLoadLiveSchema(self):
         """
         Test loading live schema

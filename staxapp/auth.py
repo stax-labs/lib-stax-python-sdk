@@ -83,18 +83,23 @@ class StaxAuth:
                 region_name=self.aws_region,
                 config=BotoConfig(signature_version=UNSIGNED),
             )
-        id = cognito_client.get_id(
-            IdentityPoolId=self.identity_pool,
-            Logins={
-                f"cognito-idp.{self.aws_region}.amazonaws.com/{self.user_pool}": token
-            },
-        )
-        id_creds = cognito_client.get_credentials_for_identity(
-            IdentityId=id["IdentityId"],
-            Logins={
-                f"cognito-idp.{self.aws_region}.amazonaws.com/{self.user_pool}": token
-            },
-        )
+        try:
+            id = cognito_client.get_id(
+                IdentityPoolId=self.identity_pool,
+                Logins={
+                    f"cognito-idp.{self.aws_region}.amazonaws.com/{self.user_pool}": token
+                },
+            )
+            id_creds = cognito_client.get_credentials_for_identity(
+                IdentityId=id["IdentityId"],
+                Logins={
+                    f"cognito-idp.{self.aws_region}.amazonaws.com/{self.user_pool}": token
+                },
+            )
+        except ClientError as e:
+            raise InvalidCredentialsException(
+                f"Unexpected Client Error. Error details: {e}"
+            )
         return id_creds
 
     def sigv4_signed_auth_headers(self, id_creds):
