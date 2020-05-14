@@ -5,6 +5,7 @@ from json.decoder import JSONDecodeError
 class ApiException(Exception):
     def __init__(self, message, response, detail=""):
         try:
+            self.status_code = response.status_code
             if response.json().get("Error"):
                 logging.error(f"{response.status_code}: {response.json()}")
                 self.message = f"Api Exception: {response.status_code} -{detail} {response.json()['Error']}"
