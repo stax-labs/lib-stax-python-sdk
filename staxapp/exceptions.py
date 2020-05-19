@@ -12,7 +12,7 @@ class ApiException(Exception):
             else:
                 logging.error(f"{response.status_code}: {response.json()}")
                 self.message = f"Api Exception:{detail} {message}"
-        except JSONDecodeError:
+        except:
             if response.content:
                 logging.error(f"{response.status_code}: {response.content}")
             else:

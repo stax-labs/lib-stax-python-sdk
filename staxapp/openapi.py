@@ -5,9 +5,9 @@ import requests
 
 from staxapp.api import Api
 from staxapp.auth import ApiTokenAuth
-from staxapp.config import ApiException, Config
+from staxapp.config import Config
 from staxapp.contract import StaxContract
-from staxapp.exceptions import ValidationException
+from staxapp.exceptions import ApiException, ValidationException
 
 
 class StaxClient:

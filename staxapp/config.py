@@ -1,8 +1,10 @@
 import logging
 import os
+import platform as sysinfo
 
 import requests
 
+import staxapp
 from staxapp.exceptions import ApiException
 
 logging.getLogger().setLevel(logging.DEBUG)
@@ -32,9 +34,13 @@ class Config:
     expiration = None
     load_live_schema = False
 
+    platform = (sysinfo.platform(),)
+    python_version = (sysinfo.python_version(),)
+    sdk_version = (staxapp.__version__,)
+
     @classmethod
     def set_config(cls):
-        cls.base_url = f"https://api.{cls.STAX_REGION}/{cls.API_VERSION}"
+        cls.base_url = f"https://{cls.hostname}/{cls.API_VERSION}"
         config_url = f"{cls.api_base_url()}/public/config"
         config_response = requests.get(config_url)
         try:
@@ -42,7 +48,7 @@ class Config:
         except requests.exceptions.HTTPError as e:
             logging.error(f"{config_response.status_code}: {config_response.json()}")
             raise ApiException(
-                str(e), config_response, detail="Could not load API config."
+                str(e), config_response, detail=" Could not load API config."
             )
 
         cls.api_config = config_response.json()
