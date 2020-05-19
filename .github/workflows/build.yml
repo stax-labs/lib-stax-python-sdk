@@ -21,27 +21,8 @@ jobs:
         run: make install
       - name: Run tests
         run: make test
-      - name: Archive code coverage results
-        uses: actions/upload-artifact@v1
+      - name: Upload coverage to Codecov 📝
+        uses: "codecov/codecov-action@v1"
         with:
-          name: code-coverage-report
-          path: coverage-reports
-        if: always()
-
-  sonarScan:
-    needs: build
-    name: SonarCloud Trigger
-    runs-on: ubuntu-latest
-    steps:
-      - name: Clone Repository
-        uses: actions/checkout@master
-      - name: Download code coverage results
-        uses: actions/download-artifact@v1
-        with:
-          name: code-coverage-report
-          path: coverage-reports
-      - name: Analyze with SonarCloud
-        uses: sonarsource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          fail_ci_if_error: true
+          file: ./coverage-reports/coverage-report.xml
