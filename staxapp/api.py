@@ -1,3 +1,5 @@
+import json
+
 import requests
 
 from staxapp.config import Config
@@ -6,6 +8,20 @@ from staxapp.exceptions import ApiException
 
 class Api:
     _requests_auth = None
+
+    @classmethod
+    def _headers(cls, custom_headers) -> dict:
+        headers = {
+            **custom_headers,
+            "User-Agent": json.dumps(
+                {
+                    "platform": Config.platform,
+                    "python_version": Config.python_version,
+                    "sdk_version": Config.sdk_version,
+                }
+            ),
+        }
+        return headers
 
     @classmethod
     def _auth(cls, **kwargs):
@@ -27,7 +43,13 @@ class Api:
         url_frag = url_frag.replace(f"/{Config.API_VERSION}", "")
         url = f"{Config.api_base_url()}/{url_frag.lstrip('/')}"
 
-        response = requests.get(url, auth=cls._auth(), params=params, **kwargs)
+        response = requests.get(
+            url,
+            auth=cls._auth(),
+            params=params,
+            headers=cls._headers(kwargs.get("headers", {})),
+            **kwargs,
+        )
         cls.handle_api_response(response)
         return response.json()
 
@@ -36,7 +58,13 @@ class Api:
         url_frag = url_frag.replace(f"/{Config.API_VERSION}", "")
         url = f"{Config.api_base_url()}/{url_frag.lstrip('/')}"
 
-        response = requests.post(url, json=payload, auth=cls._auth(), **kwargs)
+        response = requests.post(
+            url,
+            json=payload,
+            auth=cls._auth(),
+            headers=cls._headers(kwargs.get("headers", {})),
+            **kwargs,
+        )
         cls.handle_api_response(response)
         return response.json()
 
@@ -45,7 +73,13 @@ class Api:
         url_frag = url_frag.replace(f"/{Config.API_VERSION}", "")
         url = f"{Config.api_base_url()}/{url_frag.lstrip('/')}"
 
-        response = requests.put(url, json=payload, auth=cls._auth(), **kwargs)
+        response = requests.put(
+            url,
+            json=payload,
+            auth=cls._auth(),
+            headers=cls._headers(kwargs.get("headers", {})),
+            **kwargs,
+        )
         cls.handle_api_response(response)
         return response.json()
 
@@ -54,6 +88,12 @@ class Api:
         url_frag = url_frag.replace(f"/{Config.API_VERSION}", "")
         url = f"{Config.api_base_url()}/{url_frag.lstrip('/')}"
 
-        response = requests.delete(url, auth=cls._auth(), params=params, **kwargs)
+        response = requests.delete(
+            url,
+            auth=cls._auth(),
+            params=params,
+            headers=cls._headers(kwargs.get("headers", {})),
+            **kwargs,
+        )
         cls.handle_api_response(response)
         return response.json()

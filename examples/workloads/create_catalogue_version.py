@@ -43,6 +43,6 @@ response = workload_client.CreateCatalogueVersion(
 	ManifestBody=manifest_body,
 	Version=catalogue_version,
 	Description='Updating versions via sdk',
-	catalogue_id=catalogue["Id"]
+	catalogue_id=catalogue_id
 )
 print(response)
