@@ -30,9 +30,11 @@ lint: install
 format:
 	${ISORT} --apply staxapp/*.py
 	${BLACK} -t py37 staxapp/*.py
+	${BLACK} -t py37 staxapp/data/*.json
 
 download-schema:
 	curl --fail --compressed -s -o staxapp/data/schema.json https://api.au1.staxapp.cloud/20190206/public/api-document
+
 
 bundle-test: install
 	${PIP} install twine
