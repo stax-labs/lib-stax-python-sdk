@@ -43,12 +43,12 @@ class StaxClientTests(unittest.TestCase):
         with self.assertRaises(ValidationException):
             StaxClient("fake")
 
-    def testLoadLiveSchema(self):
+    def testLoadOldSchema(self):
         """
-        Test loading live schema
+        Test loading Old schema
         """
         self.Config = Config
-        self.Config.load_live_schema = True
+        self.Config.load_live_schema = False
         client = StaxClient("accounts")
         self.assertTrue(client._initialized)
 

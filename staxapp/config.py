@@ -32,7 +32,7 @@ class Config:
     org_id = None
     auth = None
     expiration = None
-    load_live_schema = False
+    load_live_schema = True
 
     platform = (sysinfo.platform(),)
     python_version = (sysinfo.python_version(),)
