@@ -42,7 +42,7 @@ class StaxContractTests(unittest.TestCase):
         """
         Test getting the default schema
         """
-        data = {"Name": "Unit", "AccountType": "Test"}
+        data = {"Name": "Unit", "AccountType": "ab13a455-033f-4947-8393-641eefc3ba5e"}
         component = "accounts.CreateAccount"
         self.StaxContract.validate(data, component)
         schema = self.StaxContract.get_schema()

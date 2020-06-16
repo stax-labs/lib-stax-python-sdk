@@ -100,7 +100,7 @@ class StaxClientTests(unittest.TestCase):
             json=response_dict,
             status=200,
         )
-        response = self.account_client.CreateAccount(Name="Unit", AccountType="Test")
+        response = self.account_client.CreateAccount(Name="Unit", AccountType="ab13a455-033f-4947-8393-641eefc3ba5e")
         self.assertEqual(response, response_dict)
 
     @responses.activate
