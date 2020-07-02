@@ -6,7 +6,7 @@
 ![deploy](https://github.com/stax-labs/lib-stax-python-sdk/workflows/deploy/badge.svg)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/staxapp)
 ## Authentication
-In order to use the Stax SDK for Python, you will need a valid [Stax API Token](https://www.stax.io/docs/users/access-stax-api-with-an-api-token-and-sdk/).
+In order to use the Stax SDK for Python, you will need a valid [Stax API Token](https://www.stax.io/developer/api-tokens/).
 
 ## Installation
 Install the package using `pip`:
@@ -49,7 +49,7 @@ print(response)
 For more information on contributing the to the Stax SDK, please see our [guide](https://github.com/stax-labs/lib-stax-python-sdk/blob/master/CONTRIBUTING.md).
 
 ## Getting Help
-* If you're having trouble using the Stax SDK, please refer to our [documentation](https://www.stax.io/docs/).<br>
+* If you're having trouble using the Stax SDK, please refer to our [documentation](https://www.stax.io/developer/api-tokens/).<br>
 * If you've encountered an issue or found a bug, please [open an issue](https://github.com/stax-labs/lib-stax-python-sdk/issues).<br>
 * For any other requests, please contact [Stax support](mailto:support@stax.io).
  
