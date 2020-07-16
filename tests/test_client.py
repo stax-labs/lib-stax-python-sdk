@@ -21,7 +21,7 @@ class StaxClientTests(unittest.TestCase):
 
     def setUp(self):
         self.Api = Api
-        self.Api._requests_auth = ("username", "password")
+        self.Api._requests_auth = lambda x, y: (x, y)
 
         self.account_client = StaxClient("accounts")
         self.workload_client = StaxClient("workloads")
