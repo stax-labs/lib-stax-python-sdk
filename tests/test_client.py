@@ -49,7 +49,7 @@ class StaxClientTests(unittest.TestCase):
         """
         self.Config = Config
         self.Config.load_live_schema = False
-        client = StaxClient("accounts")
+        client = StaxClient("accounts", force=True)
         self.assertTrue(client._initialized)
 
     @responses.activate

@@ -15,18 +15,18 @@ class StaxClient:
     _schema = dict()
     _initialized = False
 
-    def __init__(self, classname, lambda_client=None):
+    def __init__(self, classname, lambda_client=None, force=False):
         # Stax feature, eg 'quotas', 'workloads'
-        self.classname = classname
-
-        if not self._initialized:
+        if force or not self._operation_map:
+            _operation_map = dict()
             self._map_paths_to_operations()
             StaxContract.set_schema(self._schema)
-            if not self._operation_map.get(self.classname):
-                raise ValidationException(
-                    f"No such class: {self.classname}. Please use one of {list(self._operation_map)}"
-                )
-            self._initialized = True
+
+        if not self._operation_map.get(classname):
+            raise ValidationException(
+                f"No such class: {classname}. Please use one of {list(self._operation_map)}"
+            )
+        self.classname = classname
 
         if lambda_client:
             self.lambda_client = lambda_client
@@ -35,6 +35,7 @@ class StaxClient:
         else:
             Config.auth_class = ApiTokenAuth
             self._admin = False
+        self._initialized = True
 
     @classmethod
     def _load_schema(cls):
@@ -53,14 +54,10 @@ class StaxClient:
         cls._load_schema()
         for path_name, path in cls._schema["paths"].items():
             parameters = []
-            base_path = ""
-            path_parts = path_name.split("/")
 
-            for part in path_parts:
+            for part in path_name.split("/"):
                 if "{" in part:
                     parameters.append(part.replace("{", "").replace("}", ""))
-                else:
-                    base_path = f"{base_path}/{part}"
 
             for method_type, method in path.items():
                 method = path[method_type]
@@ -69,19 +66,20 @@ class StaxClient:
                 if len(operation) != 2:
                     continue
 
+                parameter_path = {
+                    "path": path_name,
+                    "method": method_type,
+                    "parameters": parameters,
+                }
+
                 api_class = operation[0]
                 method_name = operation[1]
-
                 if not cls._operation_map.get(api_class):
                     cls._operation_map[api_class] = dict()
                 if not cls._operation_map.get(api_class, {}).get(method_name):
-                    cls._operation_map[api_class][method_name] = dict()
-                    cls._operation_map[api_class][method_name]["path"] = base_path
-                    cls._operation_map[api_class][method_name]["method"] = method_type
-                    cls._operation_map[api_class][method_name]["parameters"] = []
-                cls._operation_map[api_class][method_name]["parameters"].append(
-                    parameters
-                )
+                    cls._operation_map[api_class][method_name] = []
+
+                cls._operation_map[api_class][method_name].append(parameter_path)
 
     def __getattr__(self, name):
         self.name = name
@@ -94,33 +92,40 @@ class StaxClient:
                     f"No such operation: {self.name} for {self.classname}. Please use one of {list(self._operation_map[self.classname])}"
                 )
             payload = {**kwargs}
-            parameters = ""
+
+            sorted_parameter_paths = sorted(
+                self._operation_map[self.classname][self.name],
+                key=lambda x: len(x["parameters"]),
+            )
             # All parameters starting with the most dependant
-            operation_parameters = self._operation_map[self.classname][self.name].get(
-                "parameters", []
-            )
+            operation_parameters = [
+                parameter_path["parameters"]
+                for parameter_path in sorted_parameter_paths
+            ]
             # Sort the operation map parameters
-            sorted_operation_parameters = sorted(
-                operation_parameters, key=len, reverse=True
-            )
-
+            parameter_index = -1
             # Check if the any of the parameter schemas match parameters provided
-            for parameter_list in sorted_operation_parameters:
+            for index in range(0, len(operation_parameters)):
                 # Get any parameters from the keyword args and remove them from the payload
-                if set(parameter_list).issubset(payload.keys()):
-                    for parameter in parameter_list:
-                        parameters = f"{parameters}/{payload.pop(parameter, None)}"
-            if parameters.count("/") < len(sorted_operation_parameters[-1]):
+                if set(operation_parameters[index]).issubset(payload.keys()):
+                    parameter_index = index
+            if parameter_index == -1:
                 raise ValidationException(
-                    f"Missing one or more parameters: {sorted_operation_parameters[-1]}"
+                    f"Missing one or more parameters: {operation_parameters[-1]}"
                 )
-
-            if method["method"].lower() in ["put", "post"]:
+            paramter_path = sorted_parameter_paths[parameter_index]
+            split_path = paramter_path["path"].split("/")
+            path = ""
+            for part in split_path:
+                if "{" in part:
+                    parameter = part.replace("{", "").replace("}", "")
+                    path = f"{path}/{payload.pop(parameter)}"
+                else:
+                    path = f"{path}/{part}"
+            if paramter_path["method"].lower() in ["put", "post"]:
                 # We only validate the payload for POST/PUT routes
                 StaxContract.validate(payload, method_name)
-            ret = getattr(Api, method["method"])(
-                f'{method["path"]}{parameters}', payload
-            )
+            ret = getattr(Api, paramter_path["method"])(path, payload)
             return ret
 
         return stax_wrapper
