@@ -20,11 +20,21 @@ class StaxApiTests(unittest.TestCase):
 
     def setUp(self):
         self.Api = Api
-        self.Api._requests_auth = ("username", "password")
+        self.Api._requests_auth = lambda x, y: (x, y)
 
     def testAuth(self):
+
+        Config.access_key = "1"
+        Config.secret_key = "2"
+
         auth = self.Api._auth()
-        self.assertEqual(self.Api._requests_auth, auth)
+        self.assertEqual(self.Api._requests_auth("1", "2"), auth)
+
+        Config.access_key = "3"
+        Config.secret_key = "4"
+
+        auth = self.Api._auth()
+        self.assertEqual(self.Api._requests_auth("3", "4"), auth)
 
     @responses.activate
     def testGet(self):
