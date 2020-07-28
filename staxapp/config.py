@@ -34,9 +34,9 @@ class Config:
     expiration = None
     load_live_schema = True
 
-    platform = (sysinfo.platform(),)
-    python_version = (sysinfo.python_version(),)
-    sdk_version = (staxapp.__version__,)
+    platform = sysinfo.platform()
+    python_version = sysinfo.python_version()
+    sdk_version = staxapp.__version__
 
     @classmethod
     def set_config(cls):

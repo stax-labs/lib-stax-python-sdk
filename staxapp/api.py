@@ -13,13 +13,7 @@ class Api:
     def _headers(cls, custom_headers) -> dict:
         headers = {
             **custom_headers,
-            "User-Agent": json.dumps(
-                {
-                    "platform": Config.platform,
-                    "python_version": Config.python_version,
-                    "sdk_version": Config.sdk_version,
-                }
-            ),
+            "User-Agent": f"platform/{Config.platform} python/{Config.python_version} staxapp/{Config.sdk_version}",
         }
         return headers
 
