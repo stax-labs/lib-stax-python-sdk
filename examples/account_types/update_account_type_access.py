@@ -20,4 +20,4 @@ response = accounts.UpdateAccountTypeAccess(
 	AddRoles= access_roles_to_add,
 	RemoveRoles=access_roles_to_remove
 )
-print(response)
+print(response.json())

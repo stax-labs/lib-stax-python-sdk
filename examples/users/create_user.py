@@ -22,4 +22,4 @@ response = teams.CreateUser(
 	LastName = last_name,
 	Email = user_email
 )
-print(response)
+print(response.json())

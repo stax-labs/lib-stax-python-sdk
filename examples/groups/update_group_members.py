@@ -19,4 +19,4 @@ response = teams.UpdateGroupMembers(
 	AddMembers = user_membership_to_add,
 	RemoveMembers = user_membership_to_remove
 )
-print(response)
+print(response.json())

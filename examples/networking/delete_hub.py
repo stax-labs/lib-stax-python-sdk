@@ -1,5 +1,4 @@
 import os
-import json
 
 from staxapp.config import Config
 from staxapp.openapi import StaxClient
@@ -11,4 +10,4 @@ networks = StaxClient("networking")
 
 response = networks.DeleteHub(hub_id="<hub_uuid>")
 
-print(json.dumps(response))
+print(response.json())

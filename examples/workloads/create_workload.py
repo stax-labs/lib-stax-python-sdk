@@ -25,6 +25,6 @@ response = workload_client.CreateWorkload(
     AccountId=account_id, Region='ap-southeast-2',
     Parameters=parameters, Tags=tags_dict
 )
-print(response)
+print(response.json())
 
  

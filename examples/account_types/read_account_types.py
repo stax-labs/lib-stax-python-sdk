@@ -9,4 +9,4 @@ Config.secret_key = os.getenv("STAX_SECRET_KEY")
 # Read all account types within your Stax Organisation
 accounts = StaxClient("accounts")
 response = accounts.ReadAccountTypes()
-print(response)
+print(response.json())

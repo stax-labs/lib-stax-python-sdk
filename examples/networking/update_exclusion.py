@@ -14,4 +14,4 @@ body = {
 }
 response = networks.UpdateCidrExclusion(exclusion_id="<exclusion_uuid>", **body)
 
-print(json.dumps(response))
+print(response.json())

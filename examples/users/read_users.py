@@ -9,4 +9,4 @@ Config.secret_key = os.getenv("STAX_SECRET_KEY")
 # Read all users within your Stax Organisation
 teams = StaxClient("teams")
 response = teams.ReadUsers()
-print(response)
+print(response.json())

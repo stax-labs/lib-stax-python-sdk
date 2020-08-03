@@ -13,4 +13,4 @@ access_key = <Access Key>
 teams = StaxClient("teams")
 response = teams.DeleteApiToken(AccessKey=access_key)
 
-print(response)
+print(response.json())
