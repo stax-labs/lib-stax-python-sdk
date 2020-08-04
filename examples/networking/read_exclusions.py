@@ -1,5 +1,4 @@
 import os
-import json
 
 from staxapp.config import Config
 from staxapp.openapi import StaxClient

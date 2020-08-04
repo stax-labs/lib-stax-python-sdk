@@ -15,4 +15,4 @@ catalogue_id = <Catalogue Id>
 workload_client = StaxClient("workloads")
 
 response = workload_client.DeleteCatalogueItem(catalogue_id=catalogue_id)
-print(response)
+print(response.json())

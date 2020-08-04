@@ -19,4 +19,4 @@ response = accounts.UpdatePolicies(
 	AddPolicies= policies_to_add,
 	RemovePolicies= policies_to_remove
 )
-print(response)
+print(response.json())

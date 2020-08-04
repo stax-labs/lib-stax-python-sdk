@@ -17,4 +17,4 @@ response = accounts.UpdateAccountType(
 	account_type_id = account_type_id,
 	Name = account_type_name
 )
-print(response)
+print(response.json())

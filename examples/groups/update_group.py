@@ -18,4 +18,4 @@ response = teams.UpdateGroup(
 	group_id=group_id,
 	Name=group_name
 )
-print(response)
+print(response.json())

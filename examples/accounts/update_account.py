@@ -27,4 +27,4 @@ response = accounts.UpdateAccount(
 		account_id=account_id,
 		**update_properties
 )
-print(response)
+print(response.json())

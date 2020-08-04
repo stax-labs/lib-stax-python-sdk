@@ -13,4 +13,4 @@ teams = StaxClient("teams")
 response = teams.UpdateUserInvite(
 	user_id= user_id
 )
-print(response)
+print(response.json())

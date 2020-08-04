@@ -14,4 +14,4 @@ body = {
 }
 response = networks.UpdateVpc(vpc_id="<vpc_id>", **body)
 
-print(json.dumps(response))
+print(response.json())

@@ -18,4 +18,4 @@ response = workload_client.DeleteCatalogueVersion(
 	catalogue_id=catalogue_id,
 	version_id=catalogue_version_id
 )
-print(response)
+print(response.json())

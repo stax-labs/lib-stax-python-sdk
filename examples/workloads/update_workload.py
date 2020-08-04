@@ -12,4 +12,4 @@ catalogue_version_id = <Catalogue Version Id>
 workload_client = StaxClient('workloads')
 
 response = workload_client.UpdateWorkload(workload_id=workload_id, catalogue_version_id=catalogue_version_id)
-print(response)
+print(response.json())

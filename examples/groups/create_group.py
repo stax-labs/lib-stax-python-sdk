@@ -14,4 +14,4 @@ teams = StaxClient("teams")
 response = teams.CreateGroup(
 	Name=group_name
 )
-print(response)
+print(response.json())

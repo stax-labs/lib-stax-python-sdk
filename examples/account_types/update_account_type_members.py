@@ -21,4 +21,4 @@ account_type_mappings[0]["AccountTypeId"] = account_type_id
 response = accounts.UpdateAccountTypeMembers(
 	Members=account_type_mappings
 )
-print(response)
+print(response.json())

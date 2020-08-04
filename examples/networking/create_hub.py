@@ -1,5 +1,4 @@
 import os
-import json
 
 from staxapp.config import Config
 from staxapp.openapi import StaxClient
@@ -19,4 +18,4 @@ body = {
 }
 response = networks.CreateHub(**body)
 
-print(json.dumps(response))
+print(response.json())

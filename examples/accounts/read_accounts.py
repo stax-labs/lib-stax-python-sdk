@@ -9,9 +9,9 @@ Config.secret_key = os.getenv("STAX_SECRET_KEY")
 # Read all accounts within your Stax Organisation
 accounts = StaxClient("accounts")
 response = accounts.ReadAccounts()
-print(response)
+print(response.json())
 
 # Read all active accounts within your Stax Organisation and include tags in the response
 accounts = StaxClient("accounts")
 response = accounts.ReadAccounts(filter="ACTIVE", include_tags=True)
-print(response)
+print(response.json())
