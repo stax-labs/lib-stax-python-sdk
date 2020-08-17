@@ -101,7 +101,7 @@ class StaxAuth:
                 )
                 break
             except ClientError as e:
-                # AWS will occasionally issue invalid tokens, attempt to retry up to 3 times
+                # AWS eventual consistency, attempt to retry up to 3 times
                 if "Couldn't verify signed token" in str(e):
                     continue
                 else:
