@@ -134,15 +134,39 @@ class StaxAuthTests(unittest.TestCase):
         Test the cognito client is invoked and throws an error
         """
         sa = StaxAuth("ApiAuth")
+
+        # Test Invalid Credentials
         token = jwt.encode({"sub": "unittest"}, "secret", algorithm="HS256")
         jwt_token = jwt.decode(token, verify=False)
         with self.assertRaises(InvalidCredentialsException):
             sa.sts_from_cognito_identity_pool(jwt_token.get("sub"))
 
+        # Test "Couldn't verify signed token" retry
+        expected_parameters = {
+            "IdentityPoolId": sa.identity_pool,
+            "Logins": {
+                f"cognito-idp.{sa.aws_region}.amazonaws.com/{sa.user_pool}": "unittest"
+            }
+        }
+        for i in range(sa.max_retries):
+            self.cognito_stub.add_client_error(
+                "get_id",
+                service_error_code="NotAuthorizedException",
+                service_message="Invalid login token. Couldn't verify signed token.",
+                expected_params=expected_parameters,
+            )
+        self.cognito_stub.activate()
+        
+        with self.assertRaises(InvalidCredentialsException) as e:
+            sa.sts_from_cognito_identity_pool(jwt_token.get("sub"), cognito_client=self.cognito_client)
+
+        self.assertEqual(str(e.exception), "InvalidCredentialsException: Retries Exceeded: Unexpected Client Error")
+        self.assertEqual(len(self.cognito_stub._queue), 0)
+
     def testAuthErrors(self):
         """
-      Test that errors are thrown when keys are invalid
-      """
+        Test that errors are thrown when keys are invalid
+        """
         sa = StaxAuth("ApiAuth")
         # Test with no username
         with self.assertRaises(InvalidCredentialsException):

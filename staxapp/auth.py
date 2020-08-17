@@ -13,13 +13,14 @@ from staxapp.exceptions import InvalidCredentialsException
 
 
 class StaxAuth:
-    def __init__(self, config_branch):
+    def __init__(self, config_branch, max_retries: int = 3):
         config = StaxConfig.api_config
 
         self.identity_pool = config.get(config_branch).get("identityPoolId")
         self.user_pool = config.get(config_branch).get("userPoolId")
         self.client_id = config.get(config_branch).get("userPoolWebClientId")
         self.aws_region = config.get(config_branch).get("region")
+        self.max_retries = max_retries
 
     def requests_auth(self, username, password, **kwargs):
         if username is None:
@@ -83,23 +84,35 @@ class StaxAuth:
                 region_name=self.aws_region,
                 config=BotoConfig(signature_version=UNSIGNED),
             )
-        try:
-            id = cognito_client.get_id(
-                IdentityPoolId=self.identity_pool,
-                Logins={
-                    f"cognito-idp.{self.aws_region}.amazonaws.com/{self.user_pool}": token
-                },
-            )
-            id_creds = cognito_client.get_credentials_for_identity(
-                IdentityId=id["IdentityId"],
-                Logins={
-                    f"cognito-idp.{self.aws_region}.amazonaws.com/{self.user_pool}": token
-                },
-            )
-        except ClientError as e:
+
+        for i in range(self.max_retries):
+            try:
+                id = cognito_client.get_id(
+                    IdentityPoolId=self.identity_pool,
+                    Logins={
+                        f"cognito-idp.{self.aws_region}.amazonaws.com/{self.user_pool}": token
+                    },
+                )
+                id_creds = cognito_client.get_credentials_for_identity(
+                    IdentityId=id["IdentityId"],
+                    Logins={
+                        f"cognito-idp.{self.aws_region}.amazonaws.com/{self.user_pool}": token
+                    },
+                )
+                break
+            except ClientError as e:
+                # AWS will occasionally issue invalid tokens, attempt to retry up to 3 times
+                if "Couldn't verify signed token" in str(e):
+                    continue
+                else:
+                    raise InvalidCredentialsException(
+                        f"Unexpected Client Error. Error details: {e}"
+                    )
+        else:
             raise InvalidCredentialsException(
-                f"Unexpected Client Error. Error details: {e}"
+                "Retries Exceeded: Unexpected Client Error"
             )
+
         return id_creds
 
     def sigv4_signed_auth_headers(self, id_creds):
