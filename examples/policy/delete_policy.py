@@ -13,4 +13,4 @@ organisations = StaxClient("organisations")
 response = organisations.DeletePolicy(
 	policy_id = policy_id,
 )
-print(response)
+print(response.json())

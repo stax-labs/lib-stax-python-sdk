@@ -15,4 +15,4 @@ response = accounts.CreateAccount(
 		Name=account_name,
 		AccountType=account_type,
 )
-print(response)
+print(response.json())

@@ -19,4 +19,4 @@ response = organisations.CreatePolicy(
 		Description=policy_description,
 		Policy=policy
 )
-print(response)
+print(response.json())

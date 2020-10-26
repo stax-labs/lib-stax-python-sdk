@@ -45,4 +45,4 @@ response = workload_client.CreateCatalogueVersion(
 	Description='Updating versions via sdk',
 	catalogue_id=catalogue_id
 )
-print(response)
+print(response.json())

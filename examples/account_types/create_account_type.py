@@ -13,4 +13,4 @@ accounts = StaxClient('accounts')
 response = accounts.CreateAccountType(
 	Name=account_type_name
 )
-print(response)
+print(response.json())

@@ -9,4 +9,4 @@ workload_id = <Workload Id>
 workload_client = StaxClient('workloads')
 
 response = workload_client.DeleteWorkload(workload_id=workload_id)
-print(response)
+print(response.json())

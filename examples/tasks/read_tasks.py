@@ -8,12 +8,12 @@ Config.secret_key = os.getenv("SECRET_KEY")
 
 # Read all tasks
 task_client = StaxClient("tasks")
-all_tasks = task_client.ReadTasks()
-print(all_tasks)
+response = task_client.ReadTasks()
+print(response.json())
 
 # Task Id in the response of a different StaxClient call
 task_id = <Task Id>
 
 # Get a specific task
-task = task_client.ReadTask(task_id=task_id)
-print(task)
+response = task_client.ReadTask(task_id=task_id)
+print(response.json())

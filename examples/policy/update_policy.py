@@ -20,4 +20,4 @@ response = organisations.UpdatePolicy(
 	Description=policy_description,
 	Policy=policy,
 )
-print(response)
+print(response.json())
