@@ -13,4 +13,4 @@ accounts = StaxClient('accounts')
 response = accounts.DeleteAccountType(
 	account_type_id=account_type_id
 )
-print(response)
+print(response.json())

@@ -12,4 +12,4 @@ version_id = <Catalogue Version>
 workload_client = StaxClient("workloads")
 response = workload_client.ReadCatalogueVersion(catalogue_id=catalogue_id, version_id=version_id)
 
-print(response)
+print(response.json())

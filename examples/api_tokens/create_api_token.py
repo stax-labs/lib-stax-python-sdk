@@ -17,4 +17,4 @@ store_token = <Store Token?>
 # Create an Api token with access to your Stax Organisation
 teams = StaxClient("teams")
 response = teams.CreateApiToken(Name=token_name, Role=token_role, StoreToken=store_token)
-print(response)
+print(response.json())

@@ -9,4 +9,4 @@ Config.secret_key = os.getenv("STAX_SECRET_KEY")
 # Read all policies within your Stax Organisation
 organisations = StaxClient("organisations")
 response = organisations.ReadPolicies()
-print(response)
+print(response.json())

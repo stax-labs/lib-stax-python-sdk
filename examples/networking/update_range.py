@@ -14,4 +14,4 @@ body = {
 }
 response = networks.UpdateCidrRange(range_id="<range_uuid>", **body)
 
-print(json.dumps(response))
+print(response.json())

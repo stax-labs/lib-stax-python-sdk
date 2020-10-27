@@ -21,4 +21,4 @@ response = teams.UpdateUser(
 	Role = user_role,
 	Status = user_status
 )
-print(response)
+print(response.json())

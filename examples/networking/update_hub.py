@@ -17,4 +17,4 @@ body = {
 }
 response = networks.UpdateHub(hub_id="<hub_uuid>", **body)
 
-print(json.dumps(response))
+print(response.json())

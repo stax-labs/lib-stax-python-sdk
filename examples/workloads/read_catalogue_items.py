@@ -9,4 +9,4 @@ Config.secret_key = os.getenv("STAX_SECRET_KEY")
 # Read all workload catalogue items within your Stax Organisation
 workloads = StaxClient("workloads")
 response = workloads.ReadCatalogueItems()
-print(response)
+print(response.json())

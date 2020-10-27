@@ -14,4 +14,4 @@ teams = StaxClient("teams")
 response = teams.DeleteGroup(
 	group_id=group_id
 )
-print(response)
+print(response.json())
