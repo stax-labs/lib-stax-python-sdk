@@ -22,6 +22,7 @@ test: lint
 install:
 	python3 -m venv ${VIRTUAL_ENV}
 	${PIP} install -r requirements.txt
+	${PYTHON} setup.py install
 
 lint: install
 	${ISORT} --diff staxapp/*.py

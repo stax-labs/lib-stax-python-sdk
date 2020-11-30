@@ -1,6 +1,4 @@
-aws_requests_auth
 black
-boto3
 isort
 jsonschema
 pyjwt
@@ -8,10 +6,7 @@ nose2
 openapi-spec-validator
 prance
 pycodestyle
-pycrypto
 pylint
 pytest
 pytest-cov
-requests
 responses
-warrant
