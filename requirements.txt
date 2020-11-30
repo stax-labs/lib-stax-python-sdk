@@ -3,7 +3,6 @@ isort
 jsonschema
 pyjwt
 nose2
-openapi-spec-validator
 prance
 pycodestyle
 pylint
