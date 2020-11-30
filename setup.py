@@ -8,7 +8,6 @@ requires = [
     "requests",
     "aws_requests_auth",
     "warrant",
-    "pycrypto",
     "pyjwt",
     "openapi-spec-validator",
 ]
