@@ -7,8 +7,6 @@ requires = [
     "prance",
     "requests",
     "aws_requests_auth",
-    "warrant",
-    "pyjwt",
     "openapi-spec-validator",
 ]
 
