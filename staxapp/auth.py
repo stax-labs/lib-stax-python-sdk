@@ -6,8 +6,8 @@ from aws_requests_auth.aws_auth import AWSRequestsAuth
 from botocore import UNSIGNED
 from botocore.client import Config as BotoConfig
 from botocore.exceptions import ClientError
-from warrant import AWSSRP
 
+from staxapp.aws_srp import AWSSRP
 from staxapp.config import Config as StaxConfig
 from staxapp.exceptions import InvalidCredentialsException
 

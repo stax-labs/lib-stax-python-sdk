@@ -1,7 +1,6 @@
 black
 isort
 jsonschema
-pyjwt
 nose2
 prance
 pycodestyle
@@ -9,3 +8,7 @@ pylint
 pytest
 pytest-cov
 responses
+pyjwt==1.7.1
+boto3
+aws_requests_auth
+openapi-spec-validator
