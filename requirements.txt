@@ -11,4 +11,4 @@ responses
 pyjwt==1.7.1
 boto3
 aws_requests_auth
-openapi-spec-validator
+openapi-spec-validator==0.2.9
