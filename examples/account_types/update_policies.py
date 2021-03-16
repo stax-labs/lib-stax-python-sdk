@@ -1,3 +1,4 @@
+import json
 import os
 
 from staxapp.config import Config
@@ -19,4 +20,4 @@ response = accounts.UpdatePolicies(
 	AddPolicies= policies_to_add,
 	RemovePolicies= policies_to_remove
 )
-print(response.json())
+print(json.dumps(response, indent=4, sort_keys=True))

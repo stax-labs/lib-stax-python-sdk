@@ -1,5 +1,5 @@
-import os
 import json
+import os
 
 from staxapp.config import Config
 from staxapp.openapi import StaxClient
@@ -17,4 +17,4 @@ body = {
 }
 response = networks.UpdateHub(hub_id="<hub_uuid>", **body)
 
-print(response.json())
+print(json.dumps(response, indent=4, sort_keys=True))

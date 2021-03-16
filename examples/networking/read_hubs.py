@@ -1,3 +1,4 @@
+import json
 import os
 
 from staxapp.config import Config
@@ -14,4 +15,5 @@ print(json.dumps(response, indent=4, sort_keys=True))
 
 # read hubs by statuses
 response = networks.ReadHubs(status="DELETED,ACTIVE")
-print(response.json()))
+
+print(json.dumps(response, indent=4, sort_keys=True))

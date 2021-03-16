@@ -1,3 +1,4 @@
+import json
 import os
 
 from staxapp.config import Config
@@ -18,4 +19,4 @@ response = teams.UpdateGroup(
 	group_id=group_id,
 	Name=group_name
 )
-print(response.json())
+print(json.dumps(response, indent=4, sort_keys=True))

@@ -1,3 +1,4 @@
+import json
 import os
 
 from staxapp.config import Config
@@ -14,4 +15,4 @@ teams = StaxClient("teams")
 response = teams.CreateGroup(
 	Name=group_name
 )
-print(response.json())
+print(json.dumps(response, indent=4, sort_keys=True))

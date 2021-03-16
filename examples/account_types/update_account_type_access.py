@@ -1,3 +1,4 @@
+import json
 import os
 
 from staxapp.config import Config
@@ -20,4 +21,4 @@ response = accounts.UpdateAccountTypeAccess(
 	AddRoles= access_roles_to_add,
 	RemoveRoles=access_roles_to_remove
 )
-print(response.json())
+print(json.dumps(response, indent=4, sort_keys=True))

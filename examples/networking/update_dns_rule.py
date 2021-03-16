@@ -1,3 +1,4 @@
+import json
 import os
 
 from staxapp.config import Config
@@ -14,4 +15,4 @@ body = {
 
 response = networks.UpdateDnsRule(dns_rule_id="<dns_rule_uuid>", **body)
 
-print(response.json())
+print(json.dumps(response, indent=4, sort_keys=True))

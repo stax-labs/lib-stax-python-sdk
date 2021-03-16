@@ -1,8 +1,9 @@
+import json
 import os
 
 from staxapp.config import Config
 from staxapp.openapi import StaxClient
-     
+
 account_type_name = "sdk-2" #<Account Type Name>
 
 Config.access_key = os.getenv("STAX_ACCESS_KEY")
@@ -13,4 +14,4 @@ accounts = StaxClient('accounts')
 response = accounts.CreateAccountType(
 	Name=account_type_name
 )
-print(response.json())
+print(json.dumps(response, indent=4, sort_keys=True))

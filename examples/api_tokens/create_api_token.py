@@ -1,3 +1,4 @@
+import json
 import os
 
 from staxapp.config import Config
@@ -17,4 +18,4 @@ store_token = <Store Token?>
 # Create an Api token with access to your Stax Organisation
 teams = StaxClient("teams")
 response = teams.CreateApiToken(Name=token_name, Role=token_role, StoreToken=store_token)
-print(response.json())
+print(json.dumps(response, indent=4, sort_keys=True))

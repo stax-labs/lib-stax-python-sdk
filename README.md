@@ -26,6 +26,7 @@ export STAX_SECRET_KEY=<your_secret_key>
 ### Read Accounts
 The following code can be used to read accounts within your Stax Organisation:
 ```python
+import json
 import os
 
 from staxapp.config import Config
@@ -37,12 +38,12 @@ Config.secret_key = os.getenv("STAX_SECRET_KEY")
 # Read all accounts within your Stax Organisation
 accounts = StaxClient("accounts")
 response = accounts.ReadAccounts()
-print(response.json())
+print(json.dumps(response, indent=4, sort_keys=True))
 
 # Read all active accounts within your Stax Organisation and include tags in the response
 accounts = StaxClient("accounts")
 response = accounts.ReadAccounts(filter="ACTIVE", include_tags=True)
-print(response.json())
+print(json.dumps(response, indent=4, sort_keys=True))
 ```
 
 ## Contributing
@@ -52,4 +53,3 @@ For more information on contributing the to the Stax SDK, please see our [guide]
 * If you're having trouble using the Stax SDK, please refer to our [documentation](https://www.stax.io/developer/api-tokens/).<br>
 * If you've encountered an issue or found a bug, please [open an issue](https://github.com/stax-labs/lib-stax-python-sdk/issues).<br>
 * For any other requests, please contact [Stax support](mailto:support@stax.io).
- 

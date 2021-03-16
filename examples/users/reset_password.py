@@ -1,3 +1,4 @@
+import json
 import os
 
 from staxapp.config import Config
@@ -11,6 +12,6 @@ user_id = <User Id>
 
 teams = StaxClient("teams")
 response = teams.UpdateUserPassword(
-	user_id=user_id
+	user_id = user_id
 )
-print(response.json())
+print(json.dumps(response, indent=4, sort_keys=True))

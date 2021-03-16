@@ -1,3 +1,4 @@
+import json
 import os
 
 from staxapp.config import Config
@@ -20,4 +21,4 @@ response = organisations.UpdatePolicy(
 	Description=policy_description,
 	Policy=policy,
 )
-print(response.json())
+print(json.dumps(response, indent=4, sort_keys=True))

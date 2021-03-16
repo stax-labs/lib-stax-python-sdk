@@ -1,3 +1,4 @@
+import json
 import os
 
 from staxapp.config import Config
@@ -21,4 +22,4 @@ account_type_mappings[0]["AccountTypeId"] = account_type_id
 response = accounts.UpdateAccountTypeMembers(
 	Members=account_type_mappings
 )
-print(response.json())
+print(json.dumps(response, indent=4, sort_keys=True))
