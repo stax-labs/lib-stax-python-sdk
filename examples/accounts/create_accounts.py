@@ -1,8 +1,9 @@
+import json
 import os
 
 from staxapp.config import Config
 from staxapp.openapi import StaxClient
-     
+
 account_name = <Account Name>
 account_type = <Account Type Id>
 
@@ -15,4 +16,4 @@ response = accounts.CreateAccount(
 		Name=account_name,
 		AccountType=account_type,
 )
-print(response.json())
+print(json.dumps(response, indent=4, sort_keys=True))

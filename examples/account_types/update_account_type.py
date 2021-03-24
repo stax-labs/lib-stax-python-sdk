@@ -1,3 +1,4 @@
+import json
 import os
 
 from staxapp.config import Config
@@ -17,4 +18,4 @@ response = accounts.UpdateAccountType(
 	account_type_id = account_type_id,
 	Name = account_type_name
 )
-print(response.json())
+print(json.dumps(response, indent=4, sort_keys=True))

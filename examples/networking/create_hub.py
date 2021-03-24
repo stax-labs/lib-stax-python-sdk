@@ -1,3 +1,4 @@
+import json
 import os
 
 from staxapp.config import Config
@@ -17,5 +18,4 @@ body = {
     "CreateInternetGateway": False,
 }
 response = networks.CreateHub(**body)
-
-print(response.json())
+print(json.dumps(response, indent=4, sort_keys=True))

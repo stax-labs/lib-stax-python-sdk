@@ -1,3 +1,4 @@
+import json
 import os
 
 from staxapp.config import Config
@@ -10,4 +11,4 @@ networks = StaxClient("networking")
 
 response = networks.DeleteCidrRange(range_id="<range_uuid>")
 
-print(response.json())
+print(json.dumps(response, indent=4, sort_keys=True))

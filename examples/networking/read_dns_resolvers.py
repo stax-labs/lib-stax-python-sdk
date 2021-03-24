@@ -1,3 +1,4 @@
+import json
 import os
 
 from staxapp.config import Config
@@ -11,4 +12,4 @@ networks = StaxClient("networking")
 # query all resolvers within your organisation, or provide a resolver id
 response = networks.ReadDnsResolvers(dns_resolver_id="<resolver_uuid>")
 
-print(response.json())
+print(json.dumps(response, indent=4, sort_keys=True))

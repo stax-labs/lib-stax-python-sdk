@@ -1,3 +1,4 @@
+import json
 import os
 
 from staxapp.config import Config
@@ -9,4 +10,4 @@ Config.secret_key = os.getenv("STAX_SECRET_KEY")
 # Read all policies within your Stax Organisation
 organisations = StaxClient("organisations")
 response = organisations.ReadPolicies()
-print(response.json())
+print(json.dumps(response, indent=4, sort_keys=True))

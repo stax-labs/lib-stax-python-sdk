@@ -1,3 +1,4 @@
+import json
 import os
 
 from staxapp.config import Config
@@ -13,4 +14,4 @@ access_key = <Access Key>
 teams = StaxClient("teams")
 response = teams.DeleteApiToken(AccessKey=access_key)
 
-print(response.json())
+print(json.dumps(response, indent=4, sort_keys=True))

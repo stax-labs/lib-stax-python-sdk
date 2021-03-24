@@ -1,15 +1,16 @@
+import json
 import os
 
 from staxapp.config import Config
 from staxapp.openapi import StaxClient
-     
+
 # The account you want to update
 account_id = <Account Id>
 
-#To change account types include an account type id 
+#To change account types include an account type id
 account_type_id = <Account Type Id?>
 
-# To change the tags include a dictionary of tags 
+# To change the tags include a dictionary of tags
 tags_dict = <A dictionary of tags?>
 
 Config.access_key = os.getenv("STAX_ACCESS_KEY")
@@ -27,4 +28,4 @@ response = accounts.UpdateAccount(
 		account_id=account_id,
 		**update_properties
 )
-print(response.json())
+print(json.dumps(response, indent=4, sort_keys=True))

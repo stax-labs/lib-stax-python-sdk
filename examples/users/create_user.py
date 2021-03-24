@@ -1,3 +1,4 @@
+import json
 import os
 
 from staxapp.config import Config
@@ -22,4 +23,4 @@ response = teams.CreateUser(
 	LastName = last_name,
 	Email = user_email
 )
-print(response.json())
+print(json.dumps(response, indent=4, sort_keys=True))

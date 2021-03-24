@@ -1,7 +1,9 @@
 import boto3
+import json
+
 from staxapp.config import Config
 from staxapp.openapi import StaxClient
-     
+
 # Requirements
 # - Logged into the deployment bucket account
 #	- Logged into the SDK
@@ -45,4 +47,4 @@ response = workload_client.CreateCatalogueVersion(
 	Description='Updating versions via sdk',
 	catalogue_id=catalogue_id
 )
-print(response.json())
+print(json.dumps(response, indent=4, sort_keys=True))
