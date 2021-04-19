@@ -6,6 +6,7 @@ nose2 -v basics
 """
 
 import unittest
+from unittest.mock import patch
 import jwt
 import botocore
 import requests
@@ -156,7 +157,7 @@ class StaxAuthTests(unittest.TestCase):
                 expected_params=expected_parameters,
             )
         self.cognito_stub.activate()
-        
+
         with self.assertRaises(InvalidCredentialsException) as e:
             sa.sts_from_cognito_identity_pool(jwt_token.get("sub"), cognito_client=self.cognito_client)
 
@@ -305,6 +306,37 @@ class StaxAuthTests(unittest.TestCase):
         )
         self.assertIsNotNone(StaxConfig.auth)
 
+
+    @patch("test_auth.StaxAuth.requests_auth")
+    def testApiTokenAuthExpiring(self, requests_auth_mock):
+        """
+        Test credentials close to expiration get refreshed
+        """
+        sa = StaxAuth("ApiAuth")
+        StaxConfig = Config
+        ## expiration 20 minutes in the future, no need to refresh
+        StaxConfig.expiration = datetime.now(timezone.utc) + timedelta(minutes=20)
+
+        ApiTokenAuth.requests_auth(
+            "username",
+            "password",
+            srp_client=self.aws_srp_client,
+            cognito_client=self.cognito_client,
+        )
+        requests_auth_mock.assert_not_called()
+
+        requests_auth_mock.reset_mock()
+        ## expiration in 5 minutes from now, refresh to avoid token becoming stale used
+        StaxConfig.expiration = datetime.now(timezone.utc) + timedelta(minutes=5)
+
+        ApiTokenAuth.requests_auth(
+            "username",
+            "password",
+            srp_client=self.aws_srp_client,
+            cognito_client=self.cognito_client,
+        )
+        requests_auth_mock.assert_called_once()
+
     def testRootAuthNotExpired(self):
         """
         Test credentials have not expired
@@ -357,6 +389,7 @@ class StaxAuthTests(unittest.TestCase):
             srp_client=self.aws_srp_client, cognito_client=self.cognito_client,
         )
         self.assertIsNotNone(Api._requests_auth)
+
 
 
 if __name__ == "__main__":
