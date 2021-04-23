@@ -25,7 +25,7 @@ jobs:
         # https://github.com/codecov/codecov-action codecov/1.4.0
         # Pinned this to a git sha as per recommendations in GitHub actions hardening guide.
         # see https://docs.github.com/en/actions/learn-github-actions/security-hardening-for-github-actions#using-third-party-actions
-        uses: "codecov/codecov-action@0e28ff86a50029a44d10df6ed4c308711925a6a8" 
+        uses: "codecov/codecov-action@967e2b38a85a62bd61be5529ada27ebc109948c2" 
         with:
           fail_ci_if_error: true
           file: ./coverage-reports/coverage-report.xml
