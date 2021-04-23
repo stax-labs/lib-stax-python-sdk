@@ -1,5 +1,6 @@
 #!/usr/local/bin/python3
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+from os import environ
 
 import boto3
 from aws_requests_auth.aws_auth import AWSRequestsAuth
@@ -139,7 +140,10 @@ class RootAuth:
 class ApiTokenAuth:
     @staticmethod
     def requests_auth(username, password, **kwargs):
-        if StaxConfig.expiration and StaxConfig.expiration > datetime.now(timezone.utc):
+        # Minimize the potentical for token to expire while still being used for auth (say within a lambda function)
+        if StaxConfig.expiration and StaxConfig.expiration - timedelta(
+            minutes=int(environ.get("TOKEN_EXPIRY_THRESHOLD_IN_MINS", 1))
+        ) > datetime.now(timezone.utc):
             return StaxConfig.auth
 
         return StaxAuth("ApiAuth").requests_auth(username, password, **kwargs)
