@@ -16,6 +16,7 @@ from botocore import UNSIGNED
 from botocore.client import Config as BotoConfig
 from botocore.stub import Stubber, ANY
 from datetime import datetime, timedelta, timezone
+from os import environ
 
 from staxapp.api import Api
 from staxapp.auth import StaxAuth, ApiTokenAuth, RootAuth
@@ -326,8 +327,23 @@ class StaxAuthTests(unittest.TestCase):
         requests_auth_mock.assert_not_called()
 
         requests_auth_mock.reset_mock()
+        ## expiration in 5 seconds from now, refresh to avoid token becoming stale used
+        StaxConfig.expiration = datetime.now(timezone.utc) + timedelta(seconds=5)
+
+        ApiTokenAuth.requests_auth(
+            "username",
+            "password",
+            srp_client=self.aws_srp_client,
+            cognito_client=self.cognito_client,
+        )
+        requests_auth_mock.assert_called_once()
+
+
+        requests_auth_mock.reset_mock()
         ## expiration in 5 minutes from now, refresh to avoid token becoming stale used
-        StaxConfig.expiration = datetime.now(timezone.utc) + timedelta(minutes=5)
+        ## override default triggering library to not refresh
+        environ["TOKEN_EXPIRY_THRESHOLD_IN_MINS"] = "10"
+        StaxConfig.expiration = datetime.now(timezone.utc) + timedelta(minutes=2)
 
         ApiTokenAuth.requests_auth(
             "username",

@@ -21,6 +21,16 @@ export STAX_ACCESS_KEY=<your_access_key>
 export STAX_SECRET_KEY=<your_secret_key>
 ```
 
+*Optional configuration:*
+
+##### Authentication token expiry
+
+Allows configuration of the threshold to when the Auth library should re-cache the credentials
+*Suggested use when running within CI/CD tools to reduce overall auth calls*
+~~~bash
+export TOKEN_EXPIRY_THRESHOLD_IN_MINS=2 # Type: Integer representing minutes
+~~~
+
 ## Usage
 
 ### Read Accounts
