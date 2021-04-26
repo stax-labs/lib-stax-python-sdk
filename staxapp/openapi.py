@@ -15,7 +15,7 @@ class StaxClient:
     _schema = dict()
     _initialized = False
 
-    def __init__(self, classname, lambda_client=None, force=False):
+    def __init__(self, classname, force=False):
         # Stax feature, eg 'quotas', 'workloads'
         if force or not self._operation_map:
             _operation_map = dict()
@@ -28,13 +28,7 @@ class StaxClient:
             )
         self.classname = classname
 
-        if lambda_client:
-            self.lambda_client = lambda_client
-            self._admin = True
-            self.arn = f"arn:aws:lambda:{Config.api_config['Juma']['controlplaneRegion']}:{Config.api_config['Juma']['masterAccountId']}:function:{self.classname}-admninrpc-{Config.api_config['Juma']['stage']}-{Config.branch()}"
-        else:
-            Config.auth_class = ApiTokenAuth
-            self._admin = False
+        Config.auth_class = ApiTokenAuth
         self._initialized = True
 
     @classmethod

@@ -32,9 +32,8 @@ class StaxClientTests(unittest.TestCase):
         """
         Test initializing Stax client
         """
-        client = StaxClient("accounts", lambda_client=True)
+        client = StaxClient("accounts")
         self.assertTrue(client._initialized)
-        self.assertTrue(client._admin)
 
     def testInvalidStaxClient(self):
         """
