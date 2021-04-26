@@ -737,12 +737,6 @@
 							"fullDomainName": {
 								"type": "string"
 							},
-							"masterAccountId": {
-								"type": "string"
-							},
-							"rootOrgId": {
-								"$ref": "#\/components\/schemas\/ro-uuidv4"
-							},
 							"stage": {
 								"type": "string"
 							}
@@ -769,26 +763,6 @@
 						},
 						"type": "object"
 					},
-					"Pingdom": {
-						"properties": {
-							"key": {
-								"nullable": true,
-								"type": "string"
-							}
-						},
-						"type": "object"
-					},
-					"SNS": {
-						"properties": {
-							"event": {
-								"type": "string"
-							},
-							"notify": {
-								"type": "string"
-							}
-						},
-						"type": "object"
-					},
 					"Sentry": {
 						"properties": {
 							"dsn": {
@@ -796,17 +770,6 @@
 							},
 							"projectName": {
 								"type": "string"
-							}
-						},
-						"type": "object"
-					},
-					"Storage": {
-						"properties": {
-							"bucket": {
-								"type": "string"
-							},
-							"region": {
-								"$ref": "#\/components\/schemas\/AwsRegion"
 							}
 						},
 						"type": "object"
