@@ -29,7 +29,13 @@ Allows configuration of the threshold to when the Auth library should re-cache t
 *Suggested use when running within CI/CD tools to reduce overall auth calls*
 ~~~bash
 export TOKEN_EXPIRY_THRESHOLD_IN_MINS=2 # Type: Integer representing minutes
+export CONFIG_BACKOFF_RATE=2 # Type: Float representing rate at which to extend backoff
+export CONFIG_INITIAL_WAIT=2 # Type: Float representing initial wait before retry
+export CONFIG_RETRY_LIMIT=2 # Type: Int representing number of retries before failing
 ~~~
+
+*CONFIG_* prefix is used for values used when receiving the public config data.
+This URL is prone to WAF interception which will block these requests.
 
 ## Usage
 

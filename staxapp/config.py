@@ -1,6 +1,7 @@
 import logging
 import os
 import platform as sysinfo
+from time import sleep
 
 import requests
 
@@ -42,11 +43,25 @@ class Config:
     def set_config(cls):
         cls.base_url = f"https://{cls.hostname}/{cls.API_VERSION}"
         config_url = f"{cls.api_base_url()}/public/config"
+        backoff_rate = float(os.environ.get("CONFIG_BACKOFF_RATE", "2"))
+        initial_wait = float(os.environ.get("CONFIG_INITIAL_WAIT", "0.5"))
+        retry_limit = int(os.environ.get("CONFIG_RETRY_LIMIT", "4"))
+        delay = initial_wait
         config_response = requests.get(config_url)
+        while config_response.status_code == 403 and retry_limit != 0:
+            retry_limit -= 1
+            sleep(delay)
+            delay *= backoff_rate
+            logging.warning(
+                "public config URL is likely affected by WAF protections, retrying"
+            )
+            logging.warning(f"{retry_limit} attempts left")
+            config_response = requests.get(config_url)
         try:
             config_response.raise_for_status()
         except requests.exceptions.HTTPError as e:
             logging.error(f"{config_response.status_code}: {config_response.json()}")
+
             raise ApiException(
                 str(e), config_response, detail=" Could not load API config."
             )

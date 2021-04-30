@@ -7,6 +7,7 @@ nose2 -v basics
 
 import unittest
 import responses
+from os import environ
 
 from staxapp.auth import ApiTokenAuth
 from staxapp.config import Config
@@ -31,6 +32,48 @@ class StaxConfigTests(unittest.TestCase):
             f"https://api.au1.staxapp.cloud/20190206/public/config",
             json=response_dict,
             status=500,
+        )
+        self.Config._initialized = False
+        with self.assertRaises(ApiException):
+            self.Config.init()
+
+    @responses.activate
+    def testConfigWaf(self):
+        response_dict = {"Error": "Unittest"}
+        responses.add(
+            responses.GET,
+            f"https://api.au1.staxapp.cloud/20190206/public/config",
+            json=response_dict,
+            status=403,
+        )
+        responses.add(
+            responses.GET,
+            f"https://api.au1.staxapp.cloud/20190206/public/config",
+            json=response_dict,
+            status=200,
+        )
+        self.Config._initialized = False
+        self.Config.init()
+        self.assertEqual(
+            len(responses.calls),
+            2
+        )
+
+    @responses.activate
+    def testConfigWafRetryConfig(self):
+        environ["CONFIG_RETRY_LIMIT"] = "1"
+        response_dict = {"Error": "Unittest"}
+        responses.add(
+            responses.GET,
+            f"https://api.au1.staxapp.cloud/20190206/public/config",
+            json=response_dict,
+            status=403,
+        )
+        responses.add(
+            responses.GET,
+            f"https://api.au1.staxapp.cloud/20190206/public/config",
+            json=response_dict,
+            status=403,
         )
         self.Config._initialized = False
         with self.assertRaises(ApiException):
