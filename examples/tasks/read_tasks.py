@@ -4,8 +4,8 @@ import os
 from staxapp.config import Config
 from staxapp.openapi import StaxClient
 
-Config.access_key = os.getenv("ACCESS_KEY")
-Config.secret_key = os.getenv("SECRET_KEY")
+Config.access_key = os.getenv("STAX_ACCESS_KEY")
+Config.secret_key = os.getenv("STAX_SECRET_KEY")
 
 # Read all tasks
 task_client = StaxClient("tasks")
