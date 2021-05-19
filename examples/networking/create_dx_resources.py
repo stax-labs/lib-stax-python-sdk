@@ -47,7 +47,7 @@ body = {
             "CostCode": "12345"
         },
         "Vlan": 4000,
-    },
+    }
 }
 
 response = networks.CreateDxResource(**body)
