@@ -22,10 +22,10 @@ jobs:
       - name: Run tests
         run: make test
       - name: Upload coverage to Codecov 📝
-        # https://github.com/codecov/codecov-action codecov/1.4.0
+        # https://github.com/codecov/codecov-action codecov/2.1.0
         # Pinned this to a git sha as per recommendations in GitHub actions hardening guide.
         # see https://docs.github.com/en/actions/learn-github-actions/security-hardening-for-github-actions#using-third-party-actions
-        uses: "codecov/codecov-action@967e2b38a85a62bd61be5529ada27ebc109948c2" 
+        uses: "codecov/codecov-action@f32b3a3741e1053eb607407145bc9619351dc93b"
         with:
           fail_ci_if_error: true
-          file: ./coverage-reports/coverage-report.xml
+          files: ./coverage-reports/coverage-report.xml
