@@ -1,3 +1,4 @@
+[Python - Logging Levels]:https://docs.python.org/3/library/logging.html#levels
 # Stax SDK for Python
 `staxapp` is the [Stax](https://stax.io) Software Development Kit (SDK) for Python, allowing users to interact with the Stax platform.
 
@@ -5,7 +6,7 @@
 ![build](https://github.com/stax-labs/lib-stax-python-sdk/workflows/build/badge.svg)
 ![deploy](https://github.com/stax-labs/lib-stax-python-sdk/workflows/deploy/badge.svg)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/staxapp)
-![Python - Logging Levels](https://docs.python.org/3/library/logging.html#levels)
+
 ## Authentication
 In order to use the Stax SDK for Python, you will need a valid [Stax API Token](https://www.stax.io/developer/api-tokens/).
 
@@ -37,6 +38,8 @@ export TOKEN_EXPIRY_THRESHOLD_IN_MINS=2 # Type: Integer representing minutes
 As the logging levels are set on the import of the `Config` module, the below configuration is available on the presense of following environment variables:
 
 - LOG_LEVEL: Default logger level
+
+Value of environment variables should match [Python - Logging Levels]
 
 Example:
 ~~~bash
