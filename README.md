@@ -42,8 +42,9 @@ As the logging levels are set on the import of the `Config` module, the below co
 Value of environment variables should match [Python - Logging Levels]
 
 Example:
+Changing the logging from `INFO` to `DEBUG`
 ~~~bash
-export LOG_LEVEL=INFO
+export LOG_LEVEL=DEBUG
 python run_example.py
 ~~~
 
