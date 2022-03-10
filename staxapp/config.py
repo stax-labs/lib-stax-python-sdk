@@ -8,10 +8,6 @@ import staxapp
 from staxapp.exceptions import ApiException
 
 logging.getLogger().setLevel(logging.DEBUG)
-logging.getLogger("boto3").setLevel(logging.WARNING)
-logging.getLogger("botocore").setLevel(logging.WARNING)
-logging.getLogger("nose").setLevel(logging.WARNING)
-logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 
 class Config:
