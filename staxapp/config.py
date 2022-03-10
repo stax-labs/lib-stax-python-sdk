@@ -7,7 +7,7 @@ import requests
 import staxapp
 from staxapp.exceptions import ApiException
 
-logging.getLogger().setLevel(logging.DEBUG)
+logging.getLogger().setLevel(os.environ.get("LOG_LEVEL", logging.INFO))
 
 
 class Config:
