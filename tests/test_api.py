@@ -21,6 +21,7 @@ class StaxApiTests(unittest.TestCase):
     def setUp(self):
         self.Api = Api
         self.Api._requests_auth = lambda x, y: (x, y)
+        Config.init()
 
     def testAuth(self):
 

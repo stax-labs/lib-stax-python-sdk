@@ -15,8 +15,10 @@ class StaxClient:
     _schema = dict()
     _initialized = False
 
-    def __init__(self, classname, force=False):
+    def __init__(self, classname, force=False, Config=Config):
         # Stax feature, eg 'quotas', 'workloads'
+        if not Config._initialized:
+            Config.init()
         if force or not self._operation_map:
             _operation_map = dict()
             self._map_paths_to_operations()

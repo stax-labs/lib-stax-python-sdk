@@ -50,7 +50,9 @@ class Config:
         cls.api_config = config_response.json()
 
     @classmethod
-    def init(cls, config=None):
+    def init(cls, config=None, hostname=None):
+        if hostname is not None:
+            cls.hostname = hostname
         if cls._initialized:
             return
 
@@ -78,6 +80,3 @@ class Config:
 
             cls.auth_class = ApiTokenAuth
         return cls.auth_class
-
-
-Config.init()
