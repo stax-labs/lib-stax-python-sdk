@@ -24,7 +24,7 @@ class Config:
     auth_class = None
     _initialized = False
     base_url = None
-    hostname = f"api.{STAX_REGION}"
+    _hostname = f"api.{STAX_REGION}"
     org_id = None
     auth = None
     expiration = None
@@ -34,10 +34,9 @@ class Config:
     python_version = sysinfo.python_version()
     sdk_version = staxapp.__version__
 
-    @classmethod
-    def set_config(cls):
-        cls.base_url = f"https://{cls.hostname}/{cls.API_VERSION}"
-        config_url = f"{cls.api_base_url()}/public/config"
+    def set_config(self):
+        self.base_url = f"https://{self.hostname}/{self.API_VERSION}"
+        config_url = f"{self.api_base_url()}/public/config"
         config_response = requests.get(config_url)
         try:
             config_response.raise_for_status()
@@ -47,29 +46,33 @@ class Config:
                 str(e), config_response, detail=" Could not load API config."
             )
 
-        cls.api_config = config_response.json()
+        self.api_config = config_response.json()
 
-    @classmethod
-    def init(cls, config=None):
-        if cls._initialized:
+    def init(self, config=None, hostname=None):
+        if hostname is not None and self.hostname is None:
+            self.hostname = hostname
+        if self._initialized:
             return
 
         if not config:
-            cls.set_config()
+            self.set_config()
 
-        cls._initialized = True
+        self._initialized = True
+
+    def api_base_url(self):
+        return self.base_url
 
     @classmethod
-    def api_base_url(cls):
-        return cls.base_url
+    def GetDefaultConfig(cls):
+        config = Config()
+        return config
 
-    @classmethod
     def branch(cls):
         return os.getenv("STAX_BRANCH", "master")
 
     @classmethod
     def schema_url(cls):
-        return f"{cls.base_url}/public/api-document"
+        return f"https://{cls.hostname}/{cls.API_VERSION}/public/api-document"
 
     @classmethod
     def get_auth_class(cls):
@@ -78,6 +81,3 @@ class Config:
 
             cls.auth_class = ApiTokenAuth
         return cls.auth_class
-
-
-Config.init()

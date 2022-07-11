@@ -6,6 +6,7 @@ nose2 -v basics
 """
 
 import unittest
+from unittest.mock import patch
 import responses
 
 from staxapp.auth import ApiTokenAuth
@@ -21,6 +22,20 @@ class StaxConfigTests(unittest.TestCase):
     def setUp(self):
         self.Config = Config
         self.Config.init()
+
+    @patch("staxapp.config.Config.set_config")
+    def testInit(self, set_config_mock):
+        """
+        Test init method
+        """
+        self.Config._initialized = False
+        test_hostname = "test.staxapp.cloud"
+        self.Config.init(hostname=test_hostname)
+        self.assertEqual(
+            test_hostname,
+            self.Config.hostname,
+        )
+        set_config_mock.assert_called_once()
         self.assertTrue(self.Config._initialized)
 
     @responses.activate

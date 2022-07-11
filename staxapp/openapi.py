@@ -14,9 +14,23 @@ class StaxClient:
     _operation_map = dict()
     _schema = dict()
     _initialized = False
+    _config = None
+    _requests_auth = None
 
-    def __init__(self, classname, force=False):
+    def _get_config(self):
+        return self._config
+
+    def _auth(self, **kwargs):
+        if not self._requests_auth:
+            self._requests_auth = self._config.get_auth_class().requests_auth
+        return self._requests_auth(self._config, **kwargs)
+
+    def __init__(self, classname, force=False, config=Config.GetDefaultConfig()):
         # Stax feature, eg 'quotas', 'workloads'
+        self._config = config
+        if not config._initialized:
+            self._config.init()
+
         if force or not self._operation_map:
             _operation_map = dict()
             self._map_paths_to_operations()
@@ -28,13 +42,13 @@ class StaxClient:
             )
         self.classname = classname
 
-        Config.auth_class = ApiTokenAuth
+        self.config.auth_class = ApiTokenAuth
         self._initialized = True
 
     @classmethod
     def _load_schema(cls):
-        if Config.load_live_schema:
-            schema_response = requests.get(Config.schema_url())
+        if Config.GetDefaultConfig().load_live_schema:
+            schema_response = requests.get(Config.GetDefaultConfig().schema_url())
             schema_response.raise_for_status()
             cls._schema = schema_response.json()
         else:
@@ -79,6 +93,7 @@ class StaxClient:
         self.name = name
 
         def stax_wrapper(*args, **kwargs):
+
             method_name = f"{self.classname}.{self.name}"
             method = self._operation_map[self.classname].get(self.name)
             if method is None:
@@ -119,7 +134,9 @@ class StaxClient:
             if paramter_path["method"].lower() in ["put", "post"]:
                 # We only validate the payload for POST/PUT routes
                 StaxContract.validate(payload, method_name)
-            ret = getattr(Api, paramter_path["method"])(path, payload)
+            ret = getattr(Api, paramter_path["method"])(
+                path, self._auth(), self._config, payload
+            )
             return ret
 
         return stax_wrapper

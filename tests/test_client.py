@@ -7,6 +7,7 @@ nose2 -v basics
 
 import responses
 import unittest
+from unittest.mock import patch
 
 from staxapp.api import Api
 from staxapp.config import Config
@@ -28,12 +29,17 @@ class StaxClientTests(unittest.TestCase):
         self.assertTrue(self.account_client._initialized)
         self.assertTrue(self.workload_client._initialized)
 
-    def testStaxClient(self):
+    @patch("staxapp.config.Config.init")
+    def testStaxClient(self, Config_init_mock):
         """
         Test initializing Stax client
         """
         client = StaxClient("accounts")
         self.assertTrue(client._initialized)
+
+        Config._initialized = False
+        client = StaxClient("accounts")
+        Config_init_mock.assert_called_once()
 
     def testInvalidStaxClient(self):
         """
