@@ -15,15 +15,9 @@ class StaxClient:
     _schema = dict()
     _initialized = False
     _config = None
-    _requests_auth = None
 
     def _get_config(self):
         return self._config
-
-    def _auth(self, **kwargs):
-        if not self._requests_auth:
-            self._requests_auth = self._config.get_auth_class().requests_auth
-        return self._requests_auth(self._config, **kwargs)
 
     def __init__(self, classname, force=False, config=Config.GetDefaultConfig()):
         # Stax feature, eg 'quotas', 'workloads'
@@ -134,9 +128,7 @@ class StaxClient:
             if paramter_path["method"].lower() in ["put", "post"]:
                 # We only validate the payload for POST/PUT routes
                 StaxContract.validate(payload, method_name)
-            ret = getattr(Api, paramter_path["method"])(
-                path, self._auth(), self._config, payload
-            )
+            ret = getattr(Api, paramter_path["method"])(path, payload, self._config)
             return ret
 
         return stax_wrapper

@@ -71,7 +71,7 @@ class StaxAuth:
             elif e.response["Error"]["Code"] == "UserNotFoundException":
                 raise InvalidCredentialsException(
                     message=str(e),
-                    detail=f"Please check your Access Key {username} {password}, that you have created your Api Token and that you are using the right STAX REGION {self.config.hostname} {self.aws_region}",
+                    detail=f"Please check your Access Key, that you have created your Api Token and that you are using the right STAX REGION",
                 )
             else:
                 raise InvalidCredentialsException(
@@ -135,8 +135,11 @@ class RootAuth:
     def requests_auth(username, password, **kwargs):
         if StaxConfig.expiration and StaxConfig.expiration > datetime.now(timezone.utc):
             return StaxConfig.auth
-
-        return StaxAuth("JumaAuth").requests_auth(username, password, **kwargs)
+        config = StaxConfig.GetDefaultConfig()
+        config.init()
+        config.access_key = username
+        config.secret_key = password
+        return StaxAuth("JumaAuth", config).requests_auth(**kwargs)
 
 
 class ApiTokenAuth:

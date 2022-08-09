@@ -5,6 +5,7 @@ To run:
 nose2 -v basics
 """
 
+from datetime import datetime, timezone
 import unittest
 import responses
 
@@ -18,24 +19,15 @@ class StaxApiTests(unittest.TestCase):
     Inherited class to run all unit tests for this module
     """
 
+    def mock_auth(self, config, **kwargs):
+        return
+
     def setUp(self):
         self.Api = Api
-        self.Api._requests_auth = lambda x, y: (x, y)
-        Config.init()
-
-    def testAuth(self):
-
-        Config.access_key = "1"
-        Config.secret_key = "2"
-
-        auth = self.Api._auth()
-        self.assertEqual(self.Api._requests_auth("1", "2"), auth)
-
-        Config.access_key = "3"
-        Config.secret_key = "4"
-
-        auth = self.Api._auth()
-        self.assertEqual(self.Api._requests_auth("3", "4"), auth)
+        self.config = Config()
+        self.config._requests_auth = self.mock_auth
+        self.config.expiration = datetime.now(timezone.utc)
+        self.config.init()
 
     @responses.activate
     def testGet(self):
@@ -45,11 +37,11 @@ class StaxApiTests(unittest.TestCase):
         response_dict = {"Status": "OK"}
         responses.add(
             responses.GET,
-            f"{Config.api_base_url()}/test/get/200",
+            f"{self.config.api_base_url()}/test/get/200",
             json=response_dict,
             status=200,
         )
-        response = self.Api.get("/test/get/200")
+        response = self.Api.get("/test/get/200", config=self.config)
         self.assertEqual(response, response_dict)
 
     @responses.activate
@@ -60,12 +52,12 @@ class StaxApiTests(unittest.TestCase):
         response_dict = {"Status": "OK"}
         responses.add(
             responses.GET,
-            f"{Config.api_base_url()}/test/get/200",
+            f"{self.config.api_base_url()}/test/get/200",
             json=response_dict,
             status=200,
         )
         params = {"test_param": "unit"}
-        response = self.Api.get("/test/get/200", params)
+        response = self.Api.get("/test/get/200", params, config=self.config)
         self.assertEqual(response, response_dict)
 
     @responses.activate
@@ -76,12 +68,12 @@ class StaxApiTests(unittest.TestCase):
         # Test HTTP exception
         responses.add(
             responses.GET,
-            f"{Config.api_base_url()}/test/get/exception",
+            f"{self.config.api_base_url()}/test/get/exception",
             json={"Error": "Unit test failed get"},
             status=500,
         )
         with self.assertRaises(ApiException):
-            self.Api.get("/test/get/exception")
+            self.Api.get("/test/get/exception", config=self.config)
 
     @responses.activate
     def testPost(self):
@@ -91,12 +83,12 @@ class StaxApiTests(unittest.TestCase):
         response_dict = {"Status": "OK"}
         responses.add(
             responses.POST,
-            f"{Config.api_base_url()}/test/post/200",
+            f"{self.config.api_base_url()}/test/post/200",
             json=response_dict,
             status=200,
         )
         payload = {"Unit": "Test"}
-        response = self.Api.post("/test/post/200", payload)
+        response = self.Api.post("/test/post/200", payload, config=self.config)
         self.assertEqual(response, response_dict)
 
     @responses.activate
@@ -108,25 +100,25 @@ class StaxApiTests(unittest.TestCase):
         response_dict = {"Error": "Unit Test server error for post"}
         responses.add(
             responses.POST,
-            f"{Config.api_base_url()}/test/post/exception",
+            f"{self.config.api_base_url()}/test/post/exception",
             json=response_dict,
             status=500,
         )
         payload = {"Unit": "Test"}
         with self.assertRaises(ApiException):
-            self.Api.post("/test/post/exception", payload)
+            self.Api.post("/test/post/exception", payload=payload, config=self.config)
 
         # Test 400 response
         response_dict = {"Status": "FAILED"}
         responses.add(
             responses.POST,
-            f"{Config.api_base_url()}/test/post/400",
+            f"{self.config.api_base_url()}/test/post/400",
             json=response_dict,
             status=400,
         )
         payload = {"Unit": "Test"}
         with self.assertRaises(ApiException):
-            response = self.Api.post("/test/post/400", payload)
+            response = self.Api.post("/test/post/400", payload=payload, config=self.config)
             self.assertEqual(response, response_dict)
 
     @responses.activate
@@ -137,12 +129,12 @@ class StaxApiTests(unittest.TestCase):
         response_dict = {"Status": "OK"}
         responses.add(
             responses.PUT,
-            f"{Config.api_base_url()}/test/put/200",
+            f"{self.config.api_base_url()}/test/put/200",
             json=response_dict,
             status=200,
         )
         payload = {"Unit": "Test"}
-        response = self.Api.put("/test/put/200", payload)
+        response = self.Api.put("/test/put/200", payload=payload, config=self.config)
         self.assertEqual(response, response_dict)
 
     @responses.activate
@@ -154,25 +146,25 @@ class StaxApiTests(unittest.TestCase):
         response_dict = {"Error": "Unit test server error for put"}
         responses.add(
             responses.PUT,
-            f"{Config.api_base_url()}/test/put/exception",
+            f"{self.config.api_base_url()}/test/put/exception",
             json=response_dict,
             status=500,
         )
         payload = {"Unit": "Test"}
         with self.assertRaises(ApiException):
-            self.Api.put("/test/put/exception", payload)
+            self.Api.put("/test/put/exception", payload=payload, config=self.config)
 
         # Test 400 response
         response_dict = {"Status": "FAILED"}
         responses.add(
             responses.PUT,
-            f"{Config.api_base_url()}/test/put/400",
+            f"{self.config.api_base_url()}/test/put/400",
             json=response_dict,
             status=400,
         )
         payload = {"Unit": "Test"}
         with self.assertRaises(ApiException):
-            self.Api.put("/test/put/400", payload)
+            self.Api.put("/test/put/400", payload=payload, config=self.config)
 
     @responses.activate
     def testDelete(self):
@@ -182,11 +174,11 @@ class StaxApiTests(unittest.TestCase):
         response_dict = {"Status": "OK"}
         responses.add(
             responses.DELETE,
-            f"{Config.api_base_url()}/test/delete/200",
+            f"{self.config.api_base_url()}/test/delete/200",
             json=response_dict,
             status=200,
         )
-        response = self.Api.delete("/test/delete/200")
+        response = self.Api.delete("/test/delete/200", config=self.config)
         self.assertEqual(response, response_dict)
 
     @responses.activate
@@ -198,12 +190,12 @@ class StaxApiTests(unittest.TestCase):
         response_dict = {"Error": "Unit test server error for delete"}
         responses.add(
             responses.DELETE,
-            f"{Config.api_base_url()}/test/delete/exception",
+            f"{self.config.api_base_url()}/test/delete/exception",
             json=response_dict,
             status=500,
         )
         with self.assertRaises(ApiException):
-            self.Api.delete("/test/delete/exception")
+            self.Api.delete("/test/delete/exception", config=self.config)
 
     @responses.activate
     def testFailedApiException(self):
@@ -214,31 +206,31 @@ class StaxApiTests(unittest.TestCase):
         response_dict = {}
         responses.add(
             responses.GET,
-            f"{Config.api_base_url()}/test/no/error",
+            f"{self.config.api_base_url()}/test/no/error",
             json=response_dict,
             status=500,
         )
         try:
-            self.Api.get("/test/no/error")
+            self.Api.get("/test/no/error", config=self.config)
         except ApiException as e:
             self.assertIn("Api Exception", str(e))
 
         # Test an exception which has no json in response
         responses.add(
             responses.GET,
-            f"{Config.api_base_url()}/test/invalid/json",
+            f"{self.config.api_base_url()}/test/invalid/json",
             body='<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n<title>405 Method Not Allowed</title>\n<h1>Method Not Allowed</h1>\n<p>The method is not allowed for the requested URL.</p>\n',
             status=405,
         )
         with self.assertRaises(ApiException):
-            self.Api.get("/test/invalid/json")
+            self.Api.get("/test/invalid/json", config=self.config)
 
         # Test an exception with no content
         responses.add(
-            responses.GET, f"{Config.api_base_url()}/test/no/content", status=500,
+            responses.GET, f"{self.config.api_base_url()}/test/no/content", status=500,
         )
         with self.assertRaises(ApiException):
-            self.Api.get("/test/no/content")
+            self.Api.get("/test/no/content", config=self.config)
 
 
 if __name__ == "__main__":

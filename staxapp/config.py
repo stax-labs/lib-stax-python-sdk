@@ -18,13 +18,16 @@ class Config:
     STAX_REGION = os.getenv("STAX_REGION", "au1.staxapp.cloud")
     API_VERSION = "20190206"
 
+    cached_api_config = dict()
     api_config = dict()
     access_key = None
     secret_key = None
     auth_class = None
+    _requests_auth = None
     _initialized = False
     base_url = None
     _hostname = f"api.{STAX_REGION}"
+    hostname = None
     org_id = None
     auth = None
     expiration = None
@@ -37,6 +40,13 @@ class Config:
     def set_config(self):
         self.base_url = f"https://{self.hostname}/{self.API_VERSION}"
         config_url = f"{self.api_base_url()}/public/config"
+        if config_url == self.cached_api_config.get("caching"):
+            self.api_config = self.cached_api_config
+        else:
+            self.api_config = Config.get_api_config(config_url)
+
+    @classmethod
+    def get_api_config(cls, config_url):
         config_response = requests.get(config_url)
         try:
             config_response.raise_for_status()
@@ -45,19 +55,26 @@ class Config:
             raise ApiException(
                 str(e), config_response, detail=" Could not load API config."
             )
+        cls.cached_api_config = config_response.json()
+        cls.cached_api_config["caching"] = config_url
+        return config_response.json()
 
-        self.api_config = config_response.json()
-
-    def init(self, config=None, hostname=None):
-        if hostname is not None and self.hostname is None:
-            self.hostname = hostname
+    def init(self, hostname=None):
         if self._initialized:
             return
+        if self.hostname is None:
+            self.hostname = hostname
+            if self.hostname is None:
+                self.hostname = Config._hostname
 
-        if not config:
-            self.set_config()
+        self.set_config()
 
         self._initialized = True
+
+    def _auth(self, **kwargs):
+        if not self._requests_auth:
+            self._requests_auth = self.get_auth_class().requests_auth
+        return self._requests_auth(self, **kwargs)
 
     def api_base_url(self):
         return self.base_url
@@ -72,7 +89,7 @@ class Config:
 
     @classmethod
     def schema_url(cls):
-        return f"https://{cls.hostname}/{cls.API_VERSION}/public/api-document"
+        return f"https://{cls._hostname}/{cls.API_VERSION}/public/api-document"
 
     @classmethod
     def get_auth_class(cls):

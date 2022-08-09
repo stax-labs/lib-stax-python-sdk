@@ -64,7 +64,7 @@ class StaxContract:
                 "termsOfService": "/there_is_no_tos",
                 "contact": {"url": "https://stax.io"},
             },
-            servers=[{"url": f"https://{Config.hostname}"}],
+            servers=[{"url": f"https://{Config._hostname}"}],
             paths=dict(),
             components={
                 "securitySchemes": {

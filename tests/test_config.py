@@ -20,7 +20,7 @@ class StaxConfigTests(unittest.TestCase):
     """
 
     def setUp(self):
-        self.Config = Config
+        self.Config = Config()
         self.Config.init()
 
     @patch("staxapp.config.Config.set_config")
@@ -28,15 +28,15 @@ class StaxConfigTests(unittest.TestCase):
         """
         Test init method
         """
-        self.Config._initialized = False
         test_hostname = "test.staxapp.cloud"
-        self.Config.init(hostname=test_hostname)
+        config = Config()
+        config.init(hostname=test_hostname)
         self.assertEqual(
             test_hostname,
-            self.Config.hostname,
+            config.hostname,
         )
         set_config_mock.assert_called_once()
-        self.assertTrue(self.Config._initialized)
+        self.assertTrue(config._initialized)
 
     @responses.activate
     def testConfigError(self):
@@ -48,6 +48,8 @@ class StaxConfigTests(unittest.TestCase):
             status=500,
         )
         self.Config._initialized = False
+        Config.cached_api_config = {}
+        Config.api_config = {}
         with self.assertRaises(ApiException):
             self.Config.init()
 
@@ -76,17 +78,16 @@ class StaxConfigTests(unittest.TestCase):
         Test schema url is returned
         """
         self.assertEqual(
-            self.Config.schema_url(), f"{Config.api_base_url()}/public/api-document",
+            self.Config.schema_url(), f"https://api.au1.staxapp.cloud/20190206/public/api-document",
         )
 
-    def testAuth(self):
+    def testAuthClass(self):
         """
         Test auth class is returned
         """
         StaxConfig = Config
         StaxConfig.get_auth_class()
         self.assertEqual(StaxConfig.auth_class, ApiTokenAuth)
-
 
 if __name__ == "__main__":
     unittest.main()

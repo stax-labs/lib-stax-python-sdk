@@ -5,6 +5,7 @@ To run:
 nose2 -v basics
 """
 
+from distutils.command.config import config
 import responses
 import unittest
 from unittest.mock import patch
@@ -23,23 +24,24 @@ class StaxClientTests(unittest.TestCase):
     def setUp(self):
         self.Api = Api
         self.Api._requests_auth = lambda x, y: (x, y)
-
-        self.account_client = StaxClient("accounts")
-        self.workload_client = StaxClient("workloads")
+        self.Config = Config()
+        self.Config.init()
+        self.account_client = StaxClient("accounts", config = self.Config)
+        self.workload_client = StaxClient("workloads", config = self.Config)
         self.assertTrue(self.account_client._initialized)
         self.assertTrue(self.workload_client._initialized)
 
-    @patch("staxapp.config.Config.init")
-    def testStaxClient(self, Config_init_mock):
+    def testStaxClient(self):
         """
         Test initializing Stax client
         """
-        client = StaxClient("accounts")
-        self.assertTrue(client._initialized)
+        config = Config()
+        self.assertFalse(config._initialized)
+        client = StaxClient("accounts", config)
+        self.assertTrue(client._config._initialized)
 
-        Config._initialized = False
-        client = StaxClient("accounts")
-        Config_init_mock.assert_called_once()
+        second_client = StaxClient("accounts", config)
+
 
     def testInvalidStaxClient(self):
         """
@@ -52,13 +54,14 @@ class StaxClientTests(unittest.TestCase):
         """
         Test loading Old schema
         """
-        self.Config = Config
-        self.Config.load_live_schema = False
+        config = Config()
+        config.load_live_schema = False
         client = StaxClient("accounts", force=True)
         self.assertTrue(client._initialized)
 
     @responses.activate
-    def testStaxWrapper(self):
+    @patch("test_client.Config._auth")
+    def testStaxWrapper(self, staxclient_auth_mock):
         """
         Test the Stax client wrapper
         """
@@ -66,7 +69,7 @@ class StaxClientTests(unittest.TestCase):
         response_dict = {"Status": "OK"}
         responses.add(
             responses.GET,
-            f"{Config.api_base_url()}/accounts",
+            f"{self.Config.api_base_url()}/accounts",
             json=response_dict,
             status=200,
         )
@@ -77,7 +80,7 @@ class StaxClientTests(unittest.TestCase):
         response_dict = {"Status": "OK"}
         responses.add(
             responses.GET,
-            f"{Config.api_base_url()}/accounts/fake-id",
+            f"{self.Config.api_base_url()}/accounts/fake-id",
             json=response_dict,
             status=200,
         )
@@ -89,7 +92,7 @@ class StaxClientTests(unittest.TestCase):
         response_dict = {"Status": "OK"}
         responses.add(
             responses.GET,
-            f"{Config.api_base_url()}/accounts",
+            f"{self.Config.api_base_url()}/accounts",
             json=response_dict,
             status=200,
         )
@@ -101,24 +104,26 @@ class StaxClientTests(unittest.TestCase):
         response_dict = {"Status": "OK"}
         responses.add(
             responses.POST,
-            f"{Config.api_base_url()}/accounts",
+            f"{self.Config.api_base_url()}/accounts",
             json=response_dict,
             status=200,
         )
         response = self.account_client.CreateAccount(Name="Unit", AccountType="ab13a455-033f-4947-8393-641eefc3ba5e")
         self.assertEqual(response, response_dict)
 
+
     @responses.activate
-    def testStaxWrapperErrors(self):
+    @patch("test_client.Config._auth")
+    def testStaxWrapperErrors(self, staxclient_auth_mock):
         """
         Test raising errors in StaxWrapper
         """
+
         # To ensure it fails on the assertion not calling the response
         response_dict = {"Error": "A unique UnitTest error for workload catalogues"}
-
         responses.add(
             responses.GET,
-            f"{Config.api_base_url()}/workload-catalogue/fake-id/fake-id",
+            f"{self.Config.api_base_url()}/workload-catalogue/fake-id/fake-id",
             json=response_dict,
             status=400,
         )
