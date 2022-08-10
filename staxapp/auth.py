@@ -61,6 +61,7 @@ class StaxAuth:
             client_id=self.client_id,
             client=srp_client,
         )
+
         try:
             tokens = aws.authenticate_user()
         except ClientError as e:

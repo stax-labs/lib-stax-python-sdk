@@ -8,7 +8,7 @@ from staxapp.exceptions import ApiException
 
 class Api:
     @classmethod
-    def get_config(cls, config=None, **kwargs):
+    def get_config(cls, config=None):
         if config is None:
             config = Config.GetDefaultConfig()
         return config

@@ -19,10 +19,16 @@ class StaxClient:
     def _get_config(self):
         return self._config
 
-    def __init__(self, classname, force=False, config=Config.GetDefaultConfig()):
+    def __init__(self, classname, force=False, config=None):
         # Stax feature, eg 'quotas', 'workloads'
-        self._config = config
-        if not config._initialized:
+        if config is None:
+            config = Config.GetDefaultConfig()
+        self._config = Config(
+            hostname=config.hostname,
+            access_key=config.access_key,
+            secret_key=config.secret_key,
+        )
+        if not self._config._initialized:
             self._config.init()
 
         if force or not self._operation_map:

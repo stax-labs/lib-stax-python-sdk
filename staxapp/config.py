@@ -1,6 +1,8 @@
 import logging
 import os
 import platform as sysinfo
+from distutils.command.config import config
+from email.policy import default
 
 import requests
 
@@ -23,13 +25,13 @@ class Config:
     access_key = None
     secret_key = None
     auth_class = None
+    auth = None
     _requests_auth = None
     _initialized = False
     base_url = None
     _hostname = f"api.{STAX_REGION}"
     hostname = None
     org_id = None
-    auth = None
     expiration = None
     load_live_schema = True
 
@@ -59,14 +61,16 @@ class Config:
         cls.cached_api_config["caching"] = config_url
         return config_response.json()
 
-    def init(self, hostname=None):
+    def __init__(self, hostname=None, access_key=None, secret_key=None):
+        self.hostname = hostname
+        if self.hostname is None:
+            self.hostname = Config._hostname
+        self.access_key = access_key
+        self.secret_key = secret_key
+
+    def init(self):
         if self._initialized:
             return
-        if self.hostname is None:
-            self.hostname = hostname
-            if self.hostname is None:
-                self.hostname = Config._hostname
-
         self.set_config()
 
         self._initialized = True
@@ -81,7 +85,7 @@ class Config:
 
     @classmethod
     def GetDefaultConfig(cls):
-        config = Config()
+        config = Config(Config.hostname, Config.access_key, Config.secret_key)
         return config
 
     def branch(cls):

@@ -29,8 +29,8 @@ class StaxConfigTests(unittest.TestCase):
         Test init method
         """
         test_hostname = "test.staxapp.cloud"
-        config = Config()
-        config.init(hostname=test_hostname)
+        config = Config(hostname=test_hostname)
+        config.init()
         self.assertEqual(
             test_hostname,
             config.hostname,
