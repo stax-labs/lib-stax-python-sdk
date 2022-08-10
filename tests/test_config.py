@@ -38,6 +38,23 @@ class StaxConfigTests(unittest.TestCase):
         set_config_mock.assert_called_once()
         self.assertTrue(config._initialized)
 
+    @patch("staxapp.config.Config.set_config")
+    def testInit(self, set_config_mock):
+        """
+        Test init method
+        """
+        test_hostname = "test.staxapp.cloud"
+        config = Config(hostname=test_hostname)
+        config._initialized = True
+        config.base_url = "already set"
+        config.init()
+        self.assertEqual(
+            config.base_url,
+            "already set",
+        )
+        self.assertEqual(set_config_mock.call_count, 0)
+        self.assertTrue(config._initialized)
+
     @responses.activate
     def testConfigError(self):
         response_dict = {"Error": "Unittest"}

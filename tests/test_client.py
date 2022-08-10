@@ -54,10 +54,55 @@ class StaxClientTests(unittest.TestCase):
         """
         Test loading Old schema
         """
-        config = Config()
-        config.load_live_schema = False
-        client = StaxClient("accounts", force=True)
-        self.assertTrue(client._initialized)
+        StaxClient._schema = {}
+        Config.load_live_schema = False
+        StaxClient._load_schema()
+        self.assertTrue(len(StaxClient._schema) > 0)
+
+    def testLoadNewSchema(self):
+        """
+        Test loading Old schema
+        """
+        StaxClient._schema = {}
+        Config.load_live_schema = True
+        StaxClient._load_schema()
+        self.assertTrue(len(StaxClient._schema) > 0)
+
+    @patch("test_client.StaxClient._load_schema")
+    def testMapOperations(self, mock_load_schema):
+        """
+        Test broken Map Operations
+        """
+        old_map = StaxClient._operation_map
+        StaxClient._operation_map = {}
+        StaxClient._schema = {
+            "paths": {
+                "Test/Route": {
+                    "get": {
+                        "description": "This is a test route",
+                        "operationId": "Test.Route",
+                        "parameters": [],
+
+                    }
+                },
+                "Test/Bad/Route": {
+                    "get": {
+                        "description": "This is a bad test route",
+                        "operationId": "Test.Bad.Route",
+                        "parameters": [],
+                    }
+                }
+            }
+        } 
+        try:
+            StaxClient._map_paths_to_operations()
+        except Exception as e:
+            StaxClient._operation_map = old_map
+            raise e
+
+        test_map = StaxClient._operation_map
+        StaxClient._operation_map = old_map
+        self.assertEqual(test_map, {'Test': {'Route': [{'path': 'Test/Route', 'method': 'get', 'parameters': []}]}})
 
     @responses.activate
     @patch("test_client.Config._auth")
@@ -130,15 +175,15 @@ class StaxClientTests(unittest.TestCase):
         # Test an error occurs when the wrong client is used
         with self.assertRaises(ValidationException):
             self.account_client.ReadCatalogueVersion(
-                catalogue_id="fake-id", version_id="fake-id"
+                catalogue_id="fake-id", version_id="fake-id", force=True
             )
         # Test an error occurs when a parameter is missing
         with self.assertRaises(ValidationException):
-            self.workload_client.ReadCatalogueVersion(version_id="fake-id/fake-id")
+            self.workload_client.ReadCatalogueVersion(version_id="fake-id/fake-id", force=True)
         # Test an error occurs when error in response
         with self.assertRaises(ApiException):
             self.workload_client.ReadCatalogueVersion(
-                catalogue_id="fake-id", version_id="fake-id"
+                catalogue_id="fake-id", version_id="fake-id", force=True
             )
 
 

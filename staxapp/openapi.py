@@ -16,9 +16,6 @@ class StaxClient:
     _initialized = False
     _config = None
 
-    def _get_config(self):
-        return self._config
-
     def __init__(self, classname, force=False, config=None):
         # Stax feature, eg 'quotas', 'workloads'
         if config is None:
@@ -69,6 +66,7 @@ class StaxClient:
 
             for method_type, method in path.items():
                 method = path[method_type]
+
                 operation = method.get("operationId", "").split(".")
 
                 if len(operation) != 2:

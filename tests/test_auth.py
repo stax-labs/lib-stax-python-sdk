@@ -174,17 +174,23 @@ class StaxAuthTests(unittest.TestCase):
         Test that errors are thrown when keys are invalid
         """
         noUsername = Config()
+        noUsername.init()
         noUsername.secret_key = "valid"
-        sa = StaxAuth("ApiAuth", self.config)
+        sa = StaxAuth("ApiAuth", noUsername)
         # Test with no username
-        with self.assertRaises(InvalidCredentialsException):
+        with self.assertRaises(InvalidCredentialsException) as access_key_error:
             sa.requests_auth()
-
+        self.assertEqual(access_key_error.exception.message, "InvalidCredentialsException: Please provide an Access Key to your config")
+        
         noPassword = Config()
+        noPassword.init()
         noPassword.access_key = "valid"
+        sa = StaxAuth("ApiAuth", noPassword)
         # Test with no username
-        with self.assertRaises(InvalidCredentialsException):
+        with self.assertRaises(InvalidCredentialsException) as secret_key_error:
             sa.requests_auth()
+        self.assertEqual(secret_key_error.exception.message, "InvalidCredentialsException: Please provide a Secret Key to your config")
+
 
     def stub_aws_srp(self, sa, username, error_code=None):
         expected_parameters = {

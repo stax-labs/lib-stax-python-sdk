@@ -34,6 +34,27 @@ class StaxApiTests(unittest.TestCase):
         """
         Test GET route
         """
+        Config._requests_auth = self.mock_auth
+
+        Config.expiration = datetime.now(timezone.utc)
+        response_dict = {"Status": "OK"}
+        responses.add(
+            responses.GET,
+            f"{self.config.api_base_url()}/test/get/200",
+            json=response_dict,
+            status=200,
+        )
+        response = self.Api.get("/test/get/200", None, None)
+        self.assertEqual(response, response_dict)
+        Config._requests_auth = None
+        Config.expiration = None
+
+    
+    @responses.activate
+    def testGetWithConfig(self):
+        """
+        Test GET route
+        """
         response_dict = {"Status": "OK"}
         responses.add(
             responses.GET,
