@@ -127,7 +127,7 @@ class StaxAuthTests(unittest.TestCase):
         """
         sa = StaxAuth("ApiAuth", self.config)
         token = jwt.encode({"sub": "unittest"}, "secret", algorithm="HS256")
-        jwt_token = jwt.decode(token, verify=False)
+        jwt_token = jwt.decode(token, options={"verify_signature": False}, algorithms=["HS256"])
         self.stub_cognito_creds(sa, jwt_token.get("sub"))
         creds = sa.sts_from_cognito_identity_pool(
             jwt_token.get("sub"), self.cognito_client
@@ -143,7 +143,7 @@ class StaxAuthTests(unittest.TestCase):
 
         # Test Invalid Credentials
         token = jwt.encode({"sub": "unittest"}, "secret", algorithm="HS256")
-        jwt_token = jwt.decode(token, verify=False)
+        jwt_token = jwt.decode(token, options={"verify_signature": False}, algorithms=["HS256"])
         with self.assertRaises(InvalidCredentialsException):
             sa.sts_from_cognito_identity_pool(jwt_token.get("sub"))
 
@@ -309,7 +309,7 @@ class StaxAuthTests(unittest.TestCase):
         StaxConfig = Config()
         StaxConfig.expiration = None
         token = jwt.encode({"sub": "valid_token"}, "secret", algorithm="HS256")
-        jwt_token = jwt.decode(token, verify=False)
+        jwt_token = jwt.decode(token, options={"verify_signature": False}, algorithms=["HS256"])
         self.stub_cognito_creds(sa, jwt_token.get("sub"))
         self.stub_aws_srp(sa, "username")
 
@@ -384,7 +384,7 @@ class StaxAuthTests(unittest.TestCase):
         StaxConfig = self.config
         StaxConfig.expiration = None
         token = jwt.encode({"sub": "valid_token"}, "secret", algorithm="HS256")
-        jwt_token = jwt.decode(token, verify=False)
+        jwt_token = jwt.decode(token, options={"verify_signature": False}, algorithms=["HS256"])
         self.stub_cognito_creds(sa, jwt_token.get("sub"))
         self.stub_aws_srp(sa, "username")
 
@@ -407,7 +407,7 @@ class StaxAuthTests(unittest.TestCase):
         StaxConfig.secret_key = "password"
 
         token = jwt.encode({"sub": "valid_token"}, "secret", algorithm="HS256")
-        jwt_token = jwt.decode(token, verify=False)
+        jwt_token = jwt.decode(token, options={"verify_signature": False}, algorithms=["HS256"])
         self.stub_cognito_creds(sa, jwt_token.get("sub"))
         self.stub_aws_srp(sa, "username")
         StaxConfig._auth(srp_client=self.aws_srp_client, cognito_client=self.cognito_client)
