@@ -29,8 +29,7 @@ class Config:
     _requests_auth = None
     _initialized = False
     base_url = None
-    _hostname = f"api.{STAX_REGION}"
-    hostname = None
+    hostname = f"api.{STAX_REGION}"
     org_id = None
     expiration = None
     load_live_schema = True
@@ -62,9 +61,8 @@ class Config:
         return config_response.json()
 
     def __init__(self, hostname=None, access_key=None, secret_key=None):
-        self.hostname = hostname
-        if self.hostname is None:
-            self.hostname = Config._hostname
+        if hostname is not None:
+            self.hostname = hostname
         self.access_key = access_key
         self.secret_key = secret_key
 
@@ -93,7 +91,7 @@ class Config:
 
     @classmethod
     def schema_url(cls):
-        return f"https://{cls._hostname}/{cls.API_VERSION}/public/api-document"
+        return f"https://{cls.hostname}/{cls.API_VERSION}/public/api-document"
 
     @classmethod
     def get_auth_class(cls):

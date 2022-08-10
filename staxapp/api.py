@@ -11,6 +11,7 @@ class Api:
     def get_config(cls, config=None):
         if config is None:
             config = Config.GetDefaultConfig()
+            config.init()
         return config
 
     @classmethod
