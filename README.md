@@ -23,6 +23,12 @@ export STAX_ACCESS_KEY=<your_access_key>
 export STAX_SECRET_KEY=<your_secret_key>
 ```
 
+##### Client Auth Configuration
+You can configure each client individually by passing in a config on init.
+When a client is created it's configuration will be locked in and any change to the configurations will not affect the client.
+
+This can be seen in our [guide](https://github.com/stax-labs/lib-stax-python-sdk/blob/master/examples/auth.py).
+
 *Optional configuration:*
 
 ##### Authentication token expiry
