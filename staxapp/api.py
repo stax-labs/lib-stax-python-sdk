@@ -7,7 +7,12 @@ from staxapp.exceptions import ApiException
 
 
 class Api:
-    _requests_auth = None
+    @classmethod
+    def get_config(cls, config=None):
+        if config is None:
+            config = Config.GetDefaultConfig()
+            config.init()
+        return config
 
     @classmethod
     def _headers(cls, custom_headers) -> dict:
@@ -17,12 +22,6 @@ class Api:
         }
         return headers
 
-    @classmethod
-    def _auth(cls, **kwargs):
-        if not cls._requests_auth:
-            cls._requests_auth = Config.get_auth_class().requests_auth
-        return cls._requests_auth(Config.access_key, Config.secret_key, **kwargs)
-
     @staticmethod
     def handle_api_response(response):
         try:
@@ -31,13 +30,13 @@ class Api:
             raise ApiException(str(e), response)
 
     @classmethod
-    def get(cls, url_frag, params={}, **kwargs):
-        url_frag = url_frag.replace(f"/{Config.API_VERSION}", "")
-        url = f"{Config.api_base_url()}/{url_frag.lstrip('/')}"
-
+    def get(cls, url_frag, params={}, config=None, **kwargs):
+        config = cls.get_config(config)
+        url_frag = url_frag.replace(f"/{config.API_VERSION}", "")
+        url = f"{config.api_base_url()}/{url_frag.lstrip('/')}"
         response = requests.get(
             url,
-            auth=cls._auth(),
+            auth=config._auth(),
             params=params,
             headers=cls._headers(kwargs.get("headers", {})),
             **kwargs,
@@ -46,14 +45,15 @@ class Api:
         return response.json()
 
     @classmethod
-    def post(cls, url_frag, payload={}, **kwargs):
-        url_frag = url_frag.replace(f"/{Config.API_VERSION}", "")
-        url = f"{Config.api_base_url()}/{url_frag.lstrip('/')}"
+    def post(cls, url_frag, payload={}, config=None, **kwargs):
+        config = cls.get_config(config)
+        url_frag = url_frag.replace(f"/{config.API_VERSION}", "")
+        url = f"{config.api_base_url()}/{url_frag.lstrip('/')}"
 
         response = requests.post(
             url,
             json=payload,
-            auth=cls._auth(),
+            auth=config._auth(),
             headers=cls._headers(kwargs.get("headers", {})),
             **kwargs,
         )
@@ -61,14 +61,15 @@ class Api:
         return response.json()
 
     @classmethod
-    def put(cls, url_frag, payload={}, **kwargs):
-        url_frag = url_frag.replace(f"/{Config.API_VERSION}", "")
-        url = f"{Config.api_base_url()}/{url_frag.lstrip('/')}"
+    def put(cls, url_frag, payload={}, config=None, **kwargs):
+        config = cls.get_config(config)
+        url_frag = url_frag.replace(f"/{config.API_VERSION}", "")
+        url = f"{config.api_base_url()}/{url_frag.lstrip('/')}"
 
         response = requests.put(
             url,
             json=payload,
-            auth=cls._auth(),
+            auth=config._auth(),
             headers=cls._headers(kwargs.get("headers", {})),
             **kwargs,
         )
@@ -76,13 +77,14 @@ class Api:
         return response.json()
 
     @classmethod
-    def delete(cls, url_frag, params={}, **kwargs):
-        url_frag = url_frag.replace(f"/{Config.API_VERSION}", "")
-        url = f"{Config.api_base_url()}/{url_frag.lstrip('/')}"
+    def delete(cls, url_frag, params={}, config=None, **kwargs):
+        config = cls.get_config(config)
+        url_frag = url_frag.replace(f"/{config.API_VERSION}", "")
+        url = f"{config.api_base_url()}/{url_frag.lstrip('/')}"
 
         response = requests.delete(
             url,
-            auth=cls._auth(),
+            auth=config._auth(),
             params=params,
             headers=cls._headers(kwargs.get("headers", {})),
             **kwargs,

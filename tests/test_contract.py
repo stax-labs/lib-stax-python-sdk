@@ -8,6 +8,7 @@ nose2 -v basics
 import unittest
 
 from staxapp.contract import StaxContract
+from staxapp.contract import Config
 from staxapp.exceptions import ValidationException
 
 

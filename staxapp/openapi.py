@@ -14,9 +14,20 @@ class StaxClient:
     _operation_map = dict()
     _schema = dict()
     _initialized = False
+    _config = None
 
-    def __init__(self, classname, force=False):
+    def __init__(self, classname, force=False, config=None):
         # Stax feature, eg 'quotas', 'workloads'
+        if config is None:
+            config = Config.GetDefaultConfig()
+        self._config = Config(
+            hostname=config.hostname,
+            access_key=config.access_key,
+            secret_key=config.secret_key,
+        )
+        if not self._config._initialized:
+            self._config.init()
+
         if force or not self._operation_map:
             _operation_map = dict()
             self._map_paths_to_operations()
@@ -28,13 +39,13 @@ class StaxClient:
             )
         self.classname = classname
 
-        Config.auth_class = ApiTokenAuth
+        self.config.auth_class = ApiTokenAuth
         self._initialized = True
 
     @classmethod
     def _load_schema(cls):
-        if Config.load_live_schema:
-            schema_response = requests.get(Config.schema_url())
+        if Config.GetDefaultConfig().load_live_schema:
+            schema_response = requests.get(Config.GetDefaultConfig().schema_url())
             schema_response.raise_for_status()
             cls._schema = schema_response.json()
         else:
@@ -55,6 +66,7 @@ class StaxClient:
 
             for method_type, method in path.items():
                 method = path[method_type]
+
                 operation = method.get("operationId", "").split(".")
 
                 if len(operation) != 2:
@@ -79,6 +91,7 @@ class StaxClient:
         self.name = name
 
         def stax_wrapper(*args, **kwargs):
+
             method_name = f"{self.classname}.{self.name}"
             method = self._operation_map[self.classname].get(self.name)
             if method is None:
@@ -119,7 +132,7 @@ class StaxClient:
             if paramter_path["method"].lower() in ["put", "post"]:
                 # We only validate the payload for POST/PUT routes
                 StaxContract.validate(payload, method_name)
-            ret = getattr(Api, paramter_path["method"])(path, payload)
+            ret = getattr(Api, paramter_path["method"])(path, payload, self._config)
             return ret
 
         return stax_wrapper

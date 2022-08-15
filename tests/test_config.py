@@ -6,6 +6,7 @@ nose2 -v basics
 """
 
 import unittest
+from unittest.mock import patch
 import responses
 
 from staxapp.auth import ApiTokenAuth
@@ -19,9 +20,40 @@ class StaxConfigTests(unittest.TestCase):
     """
 
     def setUp(self):
-        self.Config = Config
+        self.Config = Config()
         self.Config.init()
-        self.assertTrue(self.Config._initialized)
+
+    @patch("staxapp.config.Config.set_config")
+    def testInit(self, set_config_mock):
+        """
+        Test init method
+        """
+        test_hostname = "test.staxapp.cloud"
+        config = Config(hostname=test_hostname)
+        config.init()
+        self.assertEqual(
+            test_hostname,
+            config.hostname,
+        )
+        set_config_mock.assert_called_once()
+        self.assertTrue(config._initialized)
+
+    @patch("staxapp.config.Config.set_config")
+    def testInit(self, set_config_mock):
+        """
+        Test init method
+        """
+        test_hostname = "test.staxapp.cloud"
+        config = Config(hostname=test_hostname)
+        config._initialized = True
+        config.base_url = "already set"
+        config.init()
+        self.assertEqual(
+            config.base_url,
+            "already set",
+        )
+        self.assertEqual(set_config_mock.call_count, 0)
+        self.assertTrue(config._initialized)
 
     @responses.activate
     def testConfigError(self):
@@ -33,6 +65,8 @@ class StaxConfigTests(unittest.TestCase):
             status=500,
         )
         self.Config._initialized = False
+        Config.cached_api_config = {}
+        Config.api_config = {}
         with self.assertRaises(ApiException):
             self.Config.init()
 
@@ -61,17 +95,16 @@ class StaxConfigTests(unittest.TestCase):
         Test schema url is returned
         """
         self.assertEqual(
-            self.Config.schema_url(), f"{Config.api_base_url()}/public/api-document",
+            self.Config.schema_url(), f"https://api.au1.staxapp.cloud/20190206/public/api-document",
         )
 
-    def testAuth(self):
+    def testAuthClass(self):
         """
         Test auth class is returned
         """
         StaxConfig = Config
         StaxConfig.get_auth_class()
         self.assertEqual(StaxConfig.auth_class, ApiTokenAuth)
-
 
 if __name__ == "__main__":
     unittest.main()
