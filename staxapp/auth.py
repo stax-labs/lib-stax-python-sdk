@@ -14,7 +14,7 @@ from staxapp.exceptions import InvalidCredentialsException
 
 
 class StaxAuth:
-    def __init__(self, config_branch: str, config: StaxConfig, max_retries: int = 3):
+    def __init__(self, config_branch: str, config: StaxConfig, max_retries: int = 5):
         self.config = config
         api_config = self.config.api_config
         self.identity_pool = api_config.get(config_branch).get("identityPoolId")
@@ -52,7 +52,10 @@ class StaxAuth:
             srp_client = boto3.client(
                 "cognito-idp",
                 region_name=self.aws_region,
-                config=BotoConfig(signature_version=UNSIGNED),
+                config=BotoConfig(
+                    signature_version=UNSIGNED,
+                    retries={"max_attempts": self.max_retries, "mode": "standard"},
+                ),
             )
         aws = AWSSRP(
             username=username,
@@ -86,7 +89,10 @@ class StaxAuth:
             cognito_client = boto3.client(
                 "cognito-identity",
                 region_name=self.aws_region,
-                config=BotoConfig(signature_version=UNSIGNED),
+                config=BotoConfig(
+                    signature_version=UNSIGNED,
+                    retries={"max_attempts": self.max_retries, "mode": "standard"},
+                ),
             )
 
         for i in range(self.max_retries):
@@ -105,7 +111,7 @@ class StaxAuth:
                 )
                 break
             except ClientError as e:
-                # AWS eventual consistency, attempt to retry up to 3 times
+                # AWS eventual consistency, attempt to retry up to n (max_retries) times
                 if "Couldn't verify signed token" in str(e):
                     continue
                 else:
@@ -146,10 +152,14 @@ class RootAuth:
 class ApiTokenAuth:
     @staticmethod
     def requests_auth(config: StaxConfig, **kwargs):
-        # Minimize the potentical for token to expire while still being used for auth (say within a lambda function)
+        # Minimize the potential for token to expire while still being used for auth (say within a lambda function)
         if config.expiration and config.expiration - timedelta(
             minutes=int(environ.get("TOKEN_EXPIRY_THRESHOLD_IN_MINS", 1))
         ) > datetime.now(timezone.utc):
             return config.auth
 
-        return StaxAuth("ApiAuth", config).requests_auth(**kwargs)
+        return StaxAuth(
+            "ApiAuth",
+            config,
+            max_retries=int(environ.get("STAX_API_AUTH_MAX_RETRIES", 5)),
+        ).requests_auth(**kwargs)

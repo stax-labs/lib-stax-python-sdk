@@ -27,6 +27,7 @@ import re
 
 import boto3
 import six
+from botocore.config import Config as BotoConfig
 
 
 class WarrantException(Exception):
@@ -153,7 +154,13 @@ class AWSSRP(object):
         self.client_id = client_id
         self.client_secret = client_secret
         self.client = (
-            client if client else boto3.client("cognito-idp", region_name=pool_region)
+            client
+            if client
+            else boto3.client(
+                "cognito-idp",
+                region_name=pool_region,
+                config=BotoConfig(retries={"max_attempts": 5, "mode": "standard"}),
+            )
         )
         self.big_n = hex_to_long(n_hex)
         self.g = hex_to_long(g_hex)

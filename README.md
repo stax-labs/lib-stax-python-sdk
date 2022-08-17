@@ -31,11 +31,12 @@ This can be seen in our [guide](https://github.com/stax-labs/lib-stax-python-sdk
 
 *Optional configuration:*
 
-##### Authentication token expiry
+##### Authentication retries and token expiry
 
-Allows configuration of the threshold to when the Auth library should re-cache the credentials
+Allows configuration of the maximum number of attempts and the threshold to when the Auth library should re-cache the credentials
 *Suggested use when running within CI/CD tools to reduce overall auth calls*
 ~~~bash
+export STAX_API_AUTH_MAX_RETRIES=5
 export TOKEN_EXPIRY_THRESHOLD_IN_MINS=2 # Type: Integer representing minutes
 ~~~
 
