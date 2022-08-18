@@ -24,21 +24,50 @@ export STAX_SECRET_KEY=<your_secret_key>
 ```
 
 ##### Client Auth Configuration
-You can configure each client individually by passing in a config on init.
-When a client is created it's configuration will be locked in and any change to the configurations will not affect the client.
+The Stax SDK can configure each client individually by passing in a config on init.
+When a client is created its configuration will be locked in and any change to the configurations will not affect the client.
 
 This can be seen in our [guide](https://github.com/stax-labs/lib-stax-python-sdk/blob/master/examples/auth.py).
 
 *Optional configuration:*
 
-##### Authentication retries and token expiry
+##### Token expiry
 
-Allows configuration of the maximum number of attempts and the threshold to when the Auth library should re-cache the credentials
+The Stax SDK can be configured to refresh the API Token prior to expiry.
 *Suggested use when running within CI/CD tools to reduce overall auth calls*
-~~~bash
-export STAX_API_AUTH_MAX_RETRIES=5
+
+```python
+from staxapp.config import Config, StaxAuthRetryConfig
+
+auth_retry_config = StaxAuthRetryConfig
+auth_retry_config.token_expiry_threshold = 2
+Config.api_auth_retry_config = auth_retry_config
+```
+
+(Deprecated): This value can also be set via the following Environment Var `TOKEN_EXPIRY_THRESHOLD_IN_MINS`
+```bash
 export TOKEN_EXPIRY_THRESHOLD_IN_MINS=2 # Type: Integer representing minutes
-~~~
+```
+
+##### Retries
+
+The Stax SDK has configured safe defaults for Auth and API retries.
+This behaviour can be adjusted via the SDK config: [example](https://github.com/stax-labs/lib-stax-python-sdk/blob/master/examples/retry.py).
+
+```python
+from staxapp.config import Config, StaxAPIRetryConfig, StaxAuthRetryConfig
+
+retry_config = StaxAPIRetryConfig
+retry_config.retry_methods = ('GET', 'POST', 'PUT', 'DELETE', 'OPTIONS')
+retry_config.status_codes = (429, 500, 502, 504)
+retry_config.backoff_factor = 1.2
+retry_config.max_attempts = 3
+Config.api_retry_config = retry_config
+
+auth_retry_config = StaxAuthRetryConfig
+auth_retry_config.max_attempts = 3
+Config.api_auth_retry_config = auth_retry_config
+```
 
 ##### Logging levels
 

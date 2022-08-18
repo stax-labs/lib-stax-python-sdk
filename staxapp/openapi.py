@@ -7,7 +7,7 @@ from staxapp.api import Api
 from staxapp.auth import ApiTokenAuth
 from staxapp.config import Config
 from staxapp.contract import StaxContract
-from staxapp.exceptions import ApiException, ValidationException
+from staxapp.exceptions import ValidationException
 
 
 class StaxClient:
@@ -24,6 +24,8 @@ class StaxClient:
             hostname=config.hostname,
             access_key=config.access_key,
             secret_key=config.secret_key,
+            api_auth_retry_config=config.api_auth_retry_config,
+            api_retry_config=config.api_retry_config,
         )
         if not self._config._initialized:
             self._config.init()
@@ -111,7 +113,7 @@ class StaxClient:
             ]
             # Sort the operation map parameters
             parameter_index = -1
-            # Check if the any of the parameter schemas match parameters provided
+            # Check if any of the parameter schemas match parameters provided
             for index in range(0, len(operation_parameters)):
                 # Get any parameters from the keyword args and remove them from the payload
                 if set(operation_parameters[index]).issubset(payload.keys()):

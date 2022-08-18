@@ -1,6 +1,5 @@
 #!/usr/local/bin/python3
 from datetime import datetime, timedelta, timezone
-from os import environ
 
 import boto3
 from aws_requests_auth.aws_auth import AWSRequestsAuth
@@ -153,13 +152,13 @@ class ApiTokenAuth:
     @staticmethod
     def requests_auth(config: StaxConfig, **kwargs):
         # Minimize the potential for token to expire while still being used for auth (say within a lambda function)
+        print(config.api_auth_retry_config.token_expiry_threshold)
         if config.expiration and config.expiration - timedelta(
-            minutes=int(environ.get("TOKEN_EXPIRY_THRESHOLD_IN_MINS", 1))
+            minutes=config.api_auth_retry_config.token_expiry_threshold
         ) > datetime.now(timezone.utc):
             return config.auth
-
         return StaxAuth(
             "ApiAuth",
             config,
-            max_retries=int(environ.get("STAX_API_AUTH_MAX_RETRIES", 5)),
+            max_retries=config.api_auth_retry_config.max_attempts,
         ).requests_auth(**kwargs)
