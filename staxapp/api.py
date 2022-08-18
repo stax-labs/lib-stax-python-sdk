@@ -42,14 +42,7 @@ class Api:
         try:
             response.raise_for_status()
         except requests.exceptions.HTTPError as e:
-            if logging.getLogger().level == logging.DEBUG:
-                retry_results = []
-                for x in response.raw.retries.history:
-                    (method, url, error, status, redirect_location) = x
-                    retry_results.append(status)
-                logging.debug(
-                    f"request retried {len(response.raw.retries.history)} times, results: {retry_results}"
-                )
+            # logging.debug(f"request retried {len(response.raw.retries.history)} times") ## Useful to prove working
             raise ApiException(str(e), response)
 
     @classmethod
