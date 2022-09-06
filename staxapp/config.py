@@ -20,8 +20,9 @@ class StaxAuthRetryConfig(NamedTuple):
 
     max_attempts = 5
     token_expiry_threshold = int(
+        # Env Var for backwards compatability, deprecated since 1.3.0
         os.getenv("TOKEN_EXPIRY_THRESHOLD_IN_MINS", 1)
-    )  # Env Var for backwards compatability
+    )
 
 
 class StaxAPIRetryConfig(NamedTuple):
