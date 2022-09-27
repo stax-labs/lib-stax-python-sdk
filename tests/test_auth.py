@@ -4,7 +4,7 @@ Unit test suite for libstax.
 To run:
 nose2 -v basics
 """
-
+import os
 import unittest
 from unittest.mock import patch
 import jwt
@@ -16,11 +16,11 @@ from botocore import UNSIGNED
 from botocore.client import Config as BotoConfig
 from botocore.stub import Stubber, ANY
 from datetime import datetime, timedelta, timezone
-from os import environ
 
-from staxapp.openapi import StaxClient
+with patch.dict(os.environ, {"TOKEN_EXPIRY_THRESHOLD_IN_MINS": "10"}, clear=True):
+    from staxapp.config import Config
+
 from staxapp.auth import StaxAuth, ApiTokenAuth, RootAuth
-from staxapp.config import Config
 from staxapp.exceptions import InvalidCredentialsException
 
 
@@ -28,7 +28,8 @@ class StaxAuthTests(unittest.TestCase):
     """
     Inherited class to run all unit tests for this module
     """
-    
+
+
     def setUp(self):
         self.cognito_client = botocore.session.get_session().create_client(
             "cognito-identity",
@@ -328,6 +329,9 @@ class StaxAuthTests(unittest.TestCase):
         """
         sa = StaxAuth("ApiAuth", self.config)
         StaxConfig = self.config
+        ## Assert ENV Var used instead of default value of 1
+        assert StaxConfig.api_auth_retry_config.token_expiry_threshold == 10
+
         ## expiration 20 minutes in the future, no need to refresh
         StaxConfig.expiration = datetime.now(timezone.utc) + timedelta(minutes=20)
 
@@ -339,21 +343,7 @@ class StaxAuthTests(unittest.TestCase):
         requests_auth_mock.assert_not_called()
 
         requests_auth_mock.reset_mock()
-        ## expiration in 5 seconds from now, refresh to avoid token becoming stale used
-        StaxConfig.expiration = datetime.now(timezone.utc) + timedelta(seconds=5)
-
-        ApiTokenAuth.requests_auth(
-            config=self.config,
-            srp_client=self.aws_srp_client,
-            cognito_client=self.cognito_client,
-        )
-        requests_auth_mock.assert_called_once()
-
-
-        requests_auth_mock.reset_mock()
-        ## expiration in 5 minutes from now, refresh to avoid token becoming stale used
-        ## override default triggering library to not refresh
-        environ["TOKEN_EXPIRY_THRESHOLD_IN_MINS"] = "10"
+        ## expiration in 2 minutes from now, refresh to avoid token becoming stale used
         StaxConfig.expiration = datetime.now(timezone.utc) + timedelta(minutes=2)
 
         ApiTokenAuth.requests_auth(

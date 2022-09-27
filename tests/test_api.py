@@ -4,13 +4,16 @@ Unit test suite for libstax.
 To run:
 nose2 -v basics
 """
-
+import os
 from datetime import datetime, timezone
 import unittest
+from unittest.mock import patch
 import responses
 
 from staxapp.exceptions import ApiException
-from staxapp.config import Config
+# Due to os.getenv loading during import, need to patch in Env Var
+with patch.dict(os.environ, {"TOKEN_EXPIRY_THRESHOLD_IN_MINS": "10"}, clear=True):
+    from staxapp.config import Config
 from staxapp.api import Api
 
 
