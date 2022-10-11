@@ -152,7 +152,6 @@ class ApiTokenAuth:
     @staticmethod
     def requests_auth(config: StaxConfig, **kwargs):
         # Minimize the potential for token to expire while still being used for auth (say within a lambda function)
-        print(config.api_auth_retry_config.token_expiry_threshold)
         if config.expiration and config.expiration - timedelta(
             minutes=config.api_auth_retry_config.token_expiry_threshold
         ) > datetime.now(timezone.utc):
