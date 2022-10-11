@@ -29,7 +29,6 @@ class Api:
     @classmethod
     def request_session(cls, config: StaxAPIRetryConfig):
         """Requests retry session with backoff"""
-        print(config.retry_methods)
         return requests_retry_session(
             retries=config.max_attempts,
             status_list=config.status_codes,
