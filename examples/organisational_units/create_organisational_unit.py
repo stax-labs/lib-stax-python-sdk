@@ -7,21 +7,17 @@ from staxapp.openapi import StaxClient
 Config.access_key = os.getenv("STAX_ACCESS_KEY")
 Config.secret_key = os.getenv("STAX_SECRET_KEY")
 
-# The policy to be updated
-policy_id = <Policy Id>
-
-policy_description = <Policy Description>
-policy = <Policy Json String>
+organisational_unit_name = <Organisational Unit Name>
+parent_organisational_unit_id = <Parent Organisational Unit Id>
 tags = {
     "CostCode": "12345"
 }
 
-# Update a policy
+# Create the organisational unit
 organisations = StaxClient("organisations")
-response = organisations.UpdatePolicy(
-    policy_id = policy_id,
-    Description=policy_description,
-    Policy=policy,
+response = organisations.CreateOrganisationalUnit(
+    Name=organisational_unit_name,
+    ParentOrganisationalUnitId=parent_organisational_unit_id,
     Tags=tags,
 )
 print(json.dumps(response, indent=4, sort_keys=True))
