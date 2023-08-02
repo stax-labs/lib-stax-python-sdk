@@ -10,11 +10,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Clone Repository
-        uses: actions/checkout@master
-      - name: Setup Python 3.6
-        uses: actions/setup-python@v1
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
+      - name: Setup Python 3.9
+        uses: actions/setup-python@61a6322f88396a6271a6ee3565807d608ecaddd1
         with:
-          python-version: '3.6'
+          python-version: '3.9'
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -24,12 +24,12 @@ jobs:
           pipenv run python setup.py sdist bdist_wheel
       - name: Publish distribution 📦 to Test PyPI
         if: github.event.release.prerelease == true
-        uses: pypa/gh-action-pypi-publish@master
+        uses: pypa/gh-action-pypi-publish@f8c70e705ffc13c3b4d1221169b84f12a75d6ca8
         with:
           password: ${{ secrets.TEST_PYPI_PASSWORD }}
           repository_url: https://test.pypi.org/legacy/
       - name: Publish distribution 📦 to PyPI
         if: github.event.release.prerelease != true
-        uses: pypa/gh-action-pypi-publish@master
+        uses: pypa/gh-action-pypi-publish@f8c70e705ffc13c3b4d1221169b84f12a75d6ca8
         with:
           password: ${{ secrets.PYPI_PASSWORD }}
