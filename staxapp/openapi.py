@@ -93,7 +93,6 @@ class StaxClient:
         self.name = name
 
         def stax_wrapper(*args, **kwargs):
-
             method_name = f"{self.classname}.{self.name}"
             method = self._operation_map[self.classname].get(self.name)
             if method is None:
