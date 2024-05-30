@@ -6,7 +6,7 @@ from staxapp.openapi import StaxClient
 
 # Requirements
 # - Logged into the deployment bucket account
-#	- Logged into the SDK
+# - Logged into the SDK
 
 Config.access_key = <Access Key>
 Config.secret_key = <Secret Key>
@@ -42,9 +42,9 @@ manifest_body = f"""Resources:
 """
 
 response = workload_client.CreateCatalogueVersion(
-	ManifestBody=manifest_body,
-	Version=catalogue_version,
-	Description='Updating versions via sdk',
-	catalogue_id=catalogue_id
+    ManifestBody=manifest_body,
+    Version=catalogue_version,
+    Description='Updating versions via sdk',
+    catalogue_id=catalogue_id
 )
 print(json.dumps(response, indent=4, sort_keys=True))

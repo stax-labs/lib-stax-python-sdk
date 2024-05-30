@@ -16,7 +16,7 @@ group_name = <Group Name>
 # Create a Stax groups
 teams = StaxClient("teams")
 response = teams.UpdateGroup(
-	group_id=group_id,
-	Name=group_name
+    group_id=group_id,
+    Name=group_name
 )
 print(json.dumps(response, indent=4, sort_keys=True))

@@ -13,6 +13,6 @@ group_id = <Group Id>
 # Create a Stax groups
 teams = StaxClient("teams")
 response = teams.DeleteGroup(
-	group_id=group_id
+    group_id=group_id
 )
 print(json.dumps(response, indent=4, sort_keys=True))

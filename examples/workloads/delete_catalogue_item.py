@@ -5,7 +5,7 @@ from staxapp.openapi import StaxClient
 from staxapp.api import Api
 
 # Requirements
-#	- Logged into the SDK
+# - Logged into the SDK
 
 
 Config.access_key = <Access Key>

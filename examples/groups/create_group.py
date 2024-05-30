@@ -13,6 +13,6 @@ group_name = <Group Name>
 # Create a Stax groups
 teams = StaxClient("teams")
 response = teams.CreateGroup(
-	Name=group_name
+    Name=group_name
 )
 print(json.dumps(response, indent=4, sort_keys=True))

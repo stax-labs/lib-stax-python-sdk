@@ -19,8 +19,8 @@ user_email = <User's Email>
 # Create a Stax User
 teams = StaxClient("teams")
 response = teams.CreateUser(
-	FirstName = first_name,
-	LastName = last_name,
-	Email = user_email
+    FirstName = first_name,
+    LastName = last_name,
+    Email = user_email
 )
 print(json.dumps(response, indent=4, sort_keys=True))

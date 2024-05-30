@@ -12,6 +12,6 @@ user_id = <User Id>
 
 teams = StaxClient("teams")
 response = teams.UpdateUserPassword(
-	user_id = user_id
+    user_id = user_id
 )
 print(json.dumps(response, indent=4, sort_keys=True))
