@@ -12,9 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Clone Repository
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29
+        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # 4.1.6
       - name: Setup Python 3.9
-        uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d
+        uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d # 5.1.0
         with:
           python-version: '3.9'
       - name: Install dependencies
@@ -22,10 +22,7 @@ jobs:
       - name: Run tests
         run: make test
       - name: Upload coverage to Codecov 📝
-        # https://github.com/codecov/codecov-action codecov/2.1.0
-        # Pinned this to a git sha as per recommendations in GitHub actions hardening guide.
-        # see https://docs.github.com/en/actions/learn-github-actions/security-hardening-for-github-actions#using-third-party-actions
-        uses: "codecov/codecov-action@125fc84a9a348dbcf27191600683ec096ec9021c"
+        uses: "codecov/codecov-action@125fc84a9a348dbcf27191600683ec096ec9021c" # 4.4.1
         with:
           fail_ci_if_error: true
           files: ./coverage-reports/coverage-report.xml
