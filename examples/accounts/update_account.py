@@ -20,12 +20,12 @@ accounts = StaxClient('accounts')
 
 update_properties = {}
 if tags_dict:
-	update_properties.update(tags)
+    update_properties.update(tags)
 if account_type_id:
-	update_properties["AccountType"] = account_type_id
+    update_properties["AccountType"] = account_type_id
 
 response = accounts.UpdateAccount(
-		account_id=account_id,
-		**update_properties
+        account_id=account_id,
+        **update_properties
 )
 print(json.dumps(response, indent=4, sort_keys=True))

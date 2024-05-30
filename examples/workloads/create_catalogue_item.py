@@ -5,7 +5,7 @@ from staxapp.openapi import StaxClient
 
 # Requirements
 # - Logged into the deployment bucket account
-#	- Logged into the SDK
+# - Logged into the SDK
 
 
 Config.access_key = <Access Key>
@@ -39,9 +39,9 @@ manifest_body = f"""Resources:
       TemplateURL: s3://{bucket_name["Parameter"]["Value"]}/{cfn_name}
 """
 response = workload_client.CreateCatalogueItem(
-	Name=catalogue_name,
-	ManifestBody=manifest_body,
-	Version=catalogue_version,
-	Description='Example of how to use the sdk',
+    Name=catalogue_name,
+    ManifestBody=manifest_body,
+    Version=catalogue_version,
+    Description='Example of how to use the sdk',
 )
 

@@ -12,6 +12,6 @@ Config.secret_key = os.getenv("STAX_SECRET_KEY")
 accounts = StaxClient('accounts')
 
 response = accounts.DeleteAccountType(
-	account_type_id=account_type_id
+    account_type_id=account_type_id
 )
 print(json.dumps(response, indent=4, sort_keys=True))

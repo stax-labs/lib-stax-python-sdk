@@ -20,6 +20,6 @@ account_type_mappings[0]["AccountId"] = account_id
 account_type_mappings[0]["AccountTypeId"] = account_type_id
 
 response = accounts.UpdateAccountTypeMembers(
-	Members=account_type_mappings
+    Members=account_type_mappings
 )
 print(json.dumps(response, indent=4, sort_keys=True))

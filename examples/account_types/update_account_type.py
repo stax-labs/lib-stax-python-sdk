@@ -15,7 +15,7 @@ Config.secret_key = os.getenv("STAX_SECRET_KEY")
 accounts = StaxClient('accounts')
 
 response = accounts.UpdateAccountType(
-	account_type_id = account_type_id,
-	Name = account_type_name
+    account_type_id = account_type_id,
+    Name = account_type_name
 )
 print(json.dumps(response, indent=4, sort_keys=True))

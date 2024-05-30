@@ -10,7 +10,7 @@ Config.secret_key = os.getenv("STAX_SECRET_KEY")
 accounts = StaxClient('accounts')
 
 # An array of access_role dicts to enable or empty array
-# 	Properties: RoleName, AccountTypeId, GroupId
+# Properties: RoleName, AccountTypeId, GroupId
 access_roles_to_add = <An array of access_roles?>
 
 # # An array of access_role dicts to disable or empty arry
@@ -18,7 +18,7 @@ access_roles_to_remove = <An array of access_roles?>
 
 
 response = accounts.UpdateAccountTypeAccess(
-	AddRoles= access_roles_to_add,
-	RemoveRoles=access_roles_to_remove
+    AddRoles= access_roles_to_add,
+    RemoveRoles=access_roles_to_remove
 )
 print(json.dumps(response, indent=4, sort_keys=True))

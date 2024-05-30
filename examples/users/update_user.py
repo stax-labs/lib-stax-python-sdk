@@ -18,8 +18,8 @@ user_status = <New Status>
 # Update a Stax User
 teams = StaxClient("teams")
 response = teams.UpdateUser(
-	user_id = user_id,
-	Role = user_role,
-	Status = user_status
+    user_id = user_id,
+    Role = user_role,
+    Status = user_status
 )
 print(json.dumps(response, indent=4, sort_keys=True))

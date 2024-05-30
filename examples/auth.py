@@ -16,7 +16,7 @@ Config.secret_key = secret_key
 accounts_au1 = StaxClient('accounts')
 
 au1_response = accounts_au1.CreateAccountType(
-	Name="sdk-au1"
+    Name="sdk-au1"
 )
 
 print(json.dumps(au1_response, indent=4, sort_keys=True))
@@ -28,6 +28,6 @@ config = Config(hostname=hostname["us1"], access_key=access_key_2, secret_key=se
 us1_accounts = StaxClient('accounts', config=config)
 
 us1_response = us1_accounts.CreateAccountType(
-	Name="sdk-us1"
+    Name="sdk-us1"
 )
 print(json.dumps(us1_response, indent=4, sort_keys=True))
