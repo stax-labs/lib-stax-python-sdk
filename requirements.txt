@@ -9,7 +9,7 @@ pytest
 pytest-cov
 responses
 requests
-pyjwt==2.4.0
+pyjwt
 boto3
 aws_requests_auth
 openapi-spec-validator==0.2.9
