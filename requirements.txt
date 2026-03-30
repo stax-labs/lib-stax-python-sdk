@@ -9,6 +9,7 @@ pytest
 pytest-cov
 responses
 requests
+setuptools
 pyjwt
 boto3
 aws_requests_auth
