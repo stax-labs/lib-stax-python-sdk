@@ -26,12 +26,12 @@ install:
 
 lint: install
 	${ISORT} --diff staxapp/*.py
-	${BLACK} -t py37 --check --diff staxapp/
+	${BLACK} -t py39 --check --diff staxapp/
 
 format:
 	${ISORT} --apply staxapp/*.py
-	${BLACK} -t py37 staxapp/*.py
-	${BLACK} -t py37 staxapp/data/*.json
+	${BLACK} -t py39 staxapp/*.py
+	${BLACK} -t py39 staxapp/data/*.json
 
 download-schema:
 	curl --fail --compressed -s -o staxapp/data/schema.json https://api.au1.staxapp.cloud/20190206/public/api-document
