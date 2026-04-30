@@ -5,7 +5,6 @@ To run:
 nose2 -v basics
 """
 
-from distutils.command.config import config
 import responses
 import unittest
 from unittest.mock import patch
@@ -81,14 +80,15 @@ class StaxClientTests(unittest.TestCase):
                     "get": {
                         "description": "This is a test route",
                         "operationId": "Test.Route",
+                        "x-stax-sdk-operation-id": "Test.Route",
                         "parameters": [],
-
                     }
                 },
                 "Test/Bad/Route": {
                     "get": {
                         "description": "This is a bad test route",
                         "operationId": "Test.Bad.Route",
+                        "x-stax-sdk-operation-id": "Test.Bad.Route",
                         "parameters": [],
                     }
                 }

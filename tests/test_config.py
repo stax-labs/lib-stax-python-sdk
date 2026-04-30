@@ -95,7 +95,7 @@ class StaxConfigTests(unittest.TestCase):
         Test schema url is returned
         """
         self.assertEqual(
-            self.Config.schema_url(), f"https://api.au1.staxapp.cloud/20190206/public/api-document",
+            self.Config.schema_url(), f"https://api.au1.staxapp.cloud/20190206/public/oas3-document",
         )
 
     def testAuthClass(self):

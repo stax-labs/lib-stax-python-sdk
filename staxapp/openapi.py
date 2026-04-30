@@ -69,7 +69,7 @@ class StaxClient:
             for method_type, method in path.items():
                 method = path[method_type]
 
-                operation = method.get("operationId", "").split(".")
+                operation = method.get("x-stax-sdk-operation-id", "").split(".")
 
                 if len(operation) != 2:
                     continue
