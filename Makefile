@@ -22,7 +22,7 @@ test: lint
 install:
 	python3 -m venv ${VIRTUAL_ENV}
 	${PIP} install -r requirements.txt
-	${PYTHON} setup.py install
+	${PIP} install .
 
 lint: install
 	${ISORT} --diff staxapp/*.py
@@ -37,7 +37,7 @@ download-schema:
 
 
 bundle-test: install
-	${PIP} install twine
-	${PYTHON} setup.py sdist
+	${PIP} install build twine
+	${PYTHON} -m build
 	${VIRTUAL_ENV}/bin/twine check dist/*
 	${VIRTUAL_ENV}/bin/twine upload --repository-url https://test.pypi.org/legacy/ dist/*
