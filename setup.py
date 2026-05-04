@@ -7,7 +7,7 @@ requires = [
     "prance",
     "requests",
     "aws_requests_auth",
-    "openapi-spec-validator==0.2.9",
+    "openapi-spec-validator",
 ]
 
 
