@@ -1,7 +1,6 @@
 import json
 import logging
 import os
-from contextlib import suppress
 
 import requests
 from jsonschema import validate as json_validate
@@ -53,7 +52,7 @@ class StaxContract:
 
     @staticmethod
     def default_swagger_template() -> dict:
-        # Get the default swagger template from https://api.au1.staxapp.cloud/20190206/public/api-document
+        # Get the default swagger template from https://api.au1.staxapp.cloud/20190206/public/oas3-document
         schema_response = requests.get(Config.GetDefaultConfig().schema_url()).json()
         template = dict(
             openapi="3.0.0",

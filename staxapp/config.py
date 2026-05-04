@@ -132,7 +132,7 @@ class Config:
 
     @classmethod
     def schema_url(cls):
-        return f"https://{cls.hostname}/{cls.API_VERSION}/public/api-document"
+        return f"https://{cls.hostname}/{cls.API_VERSION}/public/oas3-document"
 
     @classmethod
     def get_auth_class(cls):

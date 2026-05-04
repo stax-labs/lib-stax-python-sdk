@@ -15,6 +15,7 @@ class StaxClient:
     _schema = dict()
     _initialized = False
     _config = None
+    _use_custom_operation_ids = True
 
     def __init__(self, classname, force=False, config=None):
         # Stax feature, eg 'quotas', 'workloads'
@@ -69,7 +70,14 @@ class StaxClient:
             for method_type, method in path.items():
                 method = path[method_type]
 
-                operation = method.get("operationId", "").split(".")
+                operation = method.get(
+                    (
+                        "x-stax-sdk-operation-id"
+                        if cls._use_custom_operation_ids
+                        else "operationId"
+                    ),
+                    "",
+                ).split(".")
 
                 if len(operation) != 2:
                     continue
