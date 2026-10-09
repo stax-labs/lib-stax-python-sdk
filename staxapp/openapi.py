@@ -79,6 +79,15 @@ class StaxClient:
                     "",
                 ).split(".")
 
+                schema = (
+                    method.get("requestBody", {})
+                    .get("content", {})
+                    .get("application/json", {})
+                    .get("schema", {})
+                    .get("$ref", "")
+                    .split("/")[-1]
+                )
+
                 if len(operation) != 2:
                     continue
 
@@ -87,6 +96,9 @@ class StaxClient:
                     "method": method_type,
                     "parameters": parameters,
                 }
+
+                if schema:
+                    parameter_path["schema"] = schema
 
                 api_class = operation[0]
                 method_name = operation[1]
@@ -101,14 +113,16 @@ class StaxClient:
         self.name = name
 
         def stax_wrapper(*args, **kwargs):
-            method_name = f"{self.classname}.{self.name}"
-            method = self._operation_map[self.classname].get(self.name)
-            if method is None:
+
+            # Check to see if we have any operations matching this class and method
+            if self._operation_map[self.classname].get(self.name) is None:
                 raise ValidationException(
                     f"No such operation: {self.name} for {self.classname}. Please use one of {list(self._operation_map[self.classname])}"
                 )
+
             payload = {**kwargs}
 
+            # It's possible that there are multiple operations under the same method name
             sorted_parameter_paths = sorted(
                 self._operation_map[self.classname][self.name],
                 key=lambda x: len(x["parameters"]),
@@ -129,8 +143,8 @@ class StaxClient:
                 raise ValidationException(
                     f"Missing one or more parameters: {operation_parameters[-1]}"
                 )
-            paramter_path = sorted_parameter_paths[parameter_index]
-            split_path = paramter_path["path"].split("/")
+            parameter_path = sorted_parameter_paths[parameter_index]
+            split_path = parameter_path["path"].split("/")
             path = ""
             for part in split_path:
                 if "{" in part:
@@ -138,10 +152,13 @@ class StaxClient:
                     path = f"{path}/{payload.pop(parameter)}"
                 else:
                     path = f"{path}/{part}"
-            if paramter_path["method"].lower() in ["put", "post"]:
+            if parameter_path["method"].lower() in ["put", "post"]:
                 # We only validate the payload for POST/PUT routes
-                StaxContract.validate(payload, method_name)
-            ret = getattr(Api, paramter_path["method"])(path, payload, self._config)
+                StaxContract.validate(
+                    payload,
+                    parameter_path.get("schema", f"{self.classname}.{self.name}"),
+                )
+            ret = getattr(Api, parameter_path["method"])(path, payload, self._config)
             return ret
 
         return stax_wrapper
