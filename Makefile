@@ -29,7 +29,7 @@ lint: install
 	${BLACK} -t py39 --check --diff staxapp/
 
 format:
-	${ISORT} --apply staxapp/*.py
+	${ISORT} staxapp/*.py
 	${BLACK} -t py39 staxapp/*.py
 
 download-schema:

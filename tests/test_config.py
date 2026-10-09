@@ -7,6 +7,7 @@ nose2 -v basics
 
 import unittest
 from unittest.mock import patch
+
 import responses
 
 from staxapp.auth import ApiTokenAuth
@@ -95,7 +96,8 @@ class StaxConfigTests(unittest.TestCase):
         Test schema url is returned
         """
         self.assertEqual(
-            self.Config.schema_url(), f"https://api.au1.staxapp.cloud/20190206/public/oas3-document",
+            self.Config.schema_url(),
+            f"https://api.au1.staxapp.cloud/20190206/public/oas3-document",
         )
 
     def testAuthClass(self):
@@ -105,6 +107,7 @@ class StaxConfigTests(unittest.TestCase):
         StaxConfig = Config
         StaxConfig.get_auth_class()
         self.assertEqual(StaxConfig.auth_class, ApiTokenAuth)
+
 
 if __name__ == "__main__":
     unittest.main()

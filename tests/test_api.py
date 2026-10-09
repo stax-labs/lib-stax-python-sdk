@@ -4,16 +4,20 @@ Unit test suite for libstax.
 To run:
 nose2 -v basics
 """
+
 import os
-from datetime import datetime, timezone
 import unittest
+from datetime import datetime, timezone
 from unittest.mock import patch
+
 import responses
 
 from staxapp.exceptions import ApiException
+
 # Due to os.getenv loading during import, need to patch in Env Var
 with patch.dict(os.environ, {"TOKEN_EXPIRY_THRESHOLD_IN_MINS": "10"}, clear=True):
     from staxapp.config import Config
+
 from staxapp.api import Api
 
 
@@ -52,7 +56,6 @@ class StaxApiTests(unittest.TestCase):
         Config._requests_auth = None
         Config.expiration = None
 
-    
     @responses.activate
     def testGetWithConfig(self):
         """
@@ -142,7 +145,9 @@ class StaxApiTests(unittest.TestCase):
         )
         payload = {"Unit": "Test"}
         with self.assertRaises(ApiException):
-            response = self.Api.post("/test/post/400", payload=payload, config=self.config)
+            response = self.Api.post(
+                "/test/post/400", payload=payload, config=self.config
+            )
             self.assertEqual(response, response_dict)
 
     @responses.activate
@@ -251,7 +256,9 @@ class StaxApiTests(unittest.TestCase):
 
         # Test an exception with no content
         responses.add(
-            responses.GET, f"{self.config.api_base_url()}/test/no/content", status=500,
+            responses.GET,
+            f"{self.config.api_base_url()}/test/no/content",
+            status=500,
         )
         with self.assertRaises(ApiException):
             self.Api.get("/test/no/content", config=self.config)

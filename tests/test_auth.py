@@ -4,23 +4,24 @@ Unit test suite for libstax.
 To run:
 nose2 -v basics
 """
+
 import os
 import unittest
+from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
-import jwt
+
 import botocore
+import jwt
 import requests
 import responses
-
 from botocore import UNSIGNED
 from botocore.client import Config as BotoConfig
-from botocore.stub import Stubber, ANY
-from datetime import datetime, timedelta, timezone
+from botocore.stub import ANY, Stubber
 
 with patch.dict(os.environ, {"TOKEN_EXPIRY_THRESHOLD_IN_MINS": "10"}, clear=True):
     from staxapp.config import Config
 
-from staxapp.auth import StaxAuth, ApiTokenAuth, RootAuth
+from staxapp.auth import ApiTokenAuth, RootAuth, StaxAuth
 from staxapp.exceptions import InvalidCredentialsException
 
 
@@ -28,7 +29,6 @@ class StaxAuthTests(unittest.TestCase):
     """
     Inherited class to run all unit tests for this module
     """
-
 
     def setUp(self):
         self.cognito_client = botocore.session.get_session().create_client(
@@ -128,7 +128,9 @@ class StaxAuthTests(unittest.TestCase):
         """
         sa = StaxAuth("ApiAuth", self.config)
         token = jwt.encode({"sub": "unittest"}, "secret", algorithm="HS256")
-        jwt_token = jwt.decode(token, options={"verify_signature": False}, algorithms=["HS256"])
+        jwt_token = jwt.decode(
+            token, options={"verify_signature": False}, algorithms=["HS256"]
+        )
         self.stub_cognito_creds(sa, jwt_token.get("sub"))
         creds = sa.sts_from_cognito_identity_pool(
             jwt_token.get("sub"), self.cognito_client
@@ -144,7 +146,9 @@ class StaxAuthTests(unittest.TestCase):
 
         # Test Invalid Credentials
         token = jwt.encode({"sub": "unittest"}, "secret", algorithm="HS256")
-        jwt_token = jwt.decode(token, options={"verify_signature": False}, algorithms=["HS256"])
+        jwt_token = jwt.decode(
+            token, options={"verify_signature": False}, algorithms=["HS256"]
+        )
         with self.assertRaises(InvalidCredentialsException):
             sa.sts_from_cognito_identity_pool(jwt_token.get("sub"))
 
@@ -153,7 +157,7 @@ class StaxAuthTests(unittest.TestCase):
             "IdentityPoolId": sa.identity_pool,
             "Logins": {
                 f"cognito-idp.{sa.aws_region}.amazonaws.com/{sa.user_pool}": "unittest"
-            }
+            },
         }
         for i in range(sa.max_retries):
             self.cognito_stub.add_client_error(
@@ -165,9 +169,14 @@ class StaxAuthTests(unittest.TestCase):
         self.cognito_stub.activate()
 
         with self.assertRaises(InvalidCredentialsException) as e:
-            sa.sts_from_cognito_identity_pool(jwt_token.get("sub"), cognito_client=self.cognito_client)
+            sa.sts_from_cognito_identity_pool(
+                jwt_token.get("sub"), cognito_client=self.cognito_client
+            )
 
-        self.assertEqual(str(e.exception), "InvalidCredentialsException: Retries Exceeded: Unexpected Client Error")
+        self.assertEqual(
+            str(e.exception),
+            "InvalidCredentialsException: Retries Exceeded: Unexpected Client Error",
+        )
         self.assertEqual(len(self.cognito_stub._queue), 0)
 
     def testAuthErrors(self):
@@ -181,8 +190,11 @@ class StaxAuthTests(unittest.TestCase):
         # Test with no username
         with self.assertRaises(InvalidCredentialsException) as access_key_error:
             sa.requests_auth()
-        self.assertEqual(access_key_error.exception.message, "InvalidCredentialsException: Please provide an Access Key to your config")
-        
+        self.assertEqual(
+            access_key_error.exception.message,
+            "InvalidCredentialsException: Please provide an Access Key to your config",
+        )
+
         noPassword = Config()
         noPassword.init()
         noPassword.access_key = "valid"
@@ -190,8 +202,10 @@ class StaxAuthTests(unittest.TestCase):
         # Test with no username
         with self.assertRaises(InvalidCredentialsException) as secret_key_error:
             sa.requests_auth()
-        self.assertEqual(secret_key_error.exception.message, "InvalidCredentialsException: Please provide a Secret Key to your config")
-
+        self.assertEqual(
+            secret_key_error.exception.message,
+            "InvalidCredentialsException: Please provide a Secret Key to your config",
+        )
 
     def stub_aws_srp(self, sa, username, error_code=None):
         expected_parameters = {
@@ -221,7 +235,9 @@ class StaxAuthTests(unittest.TestCase):
             )
             self.aws_srp_stubber.add_response(
                 "respond_to_auth_challenge",
-                {"AuthenticationResult": {"IdToken": "valid_token"},},
+                {
+                    "AuthenticationResult": {"IdToken": "valid_token"},
+                },
                 {
                     "ClientId": sa.client_id,
                     "ChallengeName": ANY,
@@ -310,7 +326,9 @@ class StaxAuthTests(unittest.TestCase):
         StaxConfig = Config()
         StaxConfig.expiration = None
         token = jwt.encode({"sub": "valid_token"}, "secret", algorithm="HS256")
-        jwt_token = jwt.decode(token, options={"verify_signature": False}, algorithms=["HS256"])
+        jwt_token = jwt.decode(
+            token, options={"verify_signature": False}, algorithms=["HS256"]
+        )
         self.stub_cognito_creds(sa, jwt_token.get("sub"))
         self.stub_aws_srp(sa, "username")
 
@@ -320,7 +338,6 @@ class StaxAuthTests(unittest.TestCase):
             cognito_client=self.cognito_client,
         )
         self.assertIsNotNone(response)
-
 
     @patch("test_auth.StaxAuth.requests_auth")
     def testApiTokenAuthExpiring(self, requests_auth_mock):
@@ -374,7 +391,9 @@ class StaxAuthTests(unittest.TestCase):
         StaxConfig = self.config
         StaxConfig.expiration = None
         token = jwt.encode({"sub": "valid_token"}, "secret", algorithm="HS256")
-        jwt_token = jwt.decode(token, options={"verify_signature": False}, algorithms=["HS256"])
+        jwt_token = jwt.decode(
+            token, options={"verify_signature": False}, algorithms=["HS256"]
+        )
         self.stub_cognito_creds(sa, jwt_token.get("sub"))
         self.stub_aws_srp(sa, "username")
 
@@ -397,12 +416,15 @@ class StaxAuthTests(unittest.TestCase):
         StaxConfig.secret_key = "password"
 
         token = jwt.encode({"sub": "valid_token"}, "secret", algorithm="HS256")
-        jwt_token = jwt.decode(token, options={"verify_signature": False}, algorithms=["HS256"])
+        jwt_token = jwt.decode(
+            token, options={"verify_signature": False}, algorithms=["HS256"]
+        )
         self.stub_cognito_creds(sa, jwt_token.get("sub"))
         self.stub_aws_srp(sa, "username")
-        StaxConfig._auth(srp_client=self.aws_srp_client, cognito_client=self.cognito_client)
+        StaxConfig._auth(
+            srp_client=self.aws_srp_client, cognito_client=self.cognito_client
+        )
         self.assertIsNotNone(StaxConfig._requests_auth)
-
 
 
 if __name__ == "__main__":
